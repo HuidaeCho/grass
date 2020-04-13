@@ -206,8 +206,12 @@ int main(int argc, char *argv[])
 			}
 		    }
 
-		    G_warning(_("Values in column <%s> will be overwritten"),
-			      options.col[col]);
+		    if (G_get_overwrite())
+			G_warning(_("Values in column <%s> will be overwritten"),
+				  options.col[col]);
+		    else
+			G_fatal_error(_("Column <%s> exists. To overwrite, use the --overwrite flag"),
+				      options.col[col]);
 
 		    break;
 		}
@@ -395,6 +399,14 @@ int main(int argc, char *argv[])
 
     if (!(options.print || options.total)) {
 	print_stat();
+
+	if (Vect_open_update_head(&Map, options.name, "") < 0)
+	    G_warning(_("Unable to write history for vector map <%s>"),
+		      options.name);
+	else {
+	    Vect_hist_command(&Map);
+	    Vect_close(&Map);
+	}
     }
 
     /* free list */
