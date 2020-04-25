@@ -339,7 +339,7 @@ def help_message(default_gui):
             gui=_("use $DEFAULT_GUI graphical user interface"),
             gui_detail=_("and set as default"),
             config=_("print GRASS configuration parameters"),
-            config_detail=_("options: arch,build,compiler,path,revision,svn_revision,version"),
+            config_detail=_("options: arch,build,compiler,date,path,revision,svn_revision,version"),
             params=_("Parameters"),
             gisdbase=_("initial GRASS database directory"),
             gisdbase_detail=_("directory containing Locations"),
@@ -1487,13 +1487,18 @@ def set_language(grass_config_dir):
     os.environ['LANGUAGE'] = language
     os.environ['LANG'] = language
 
-    if language == 'ko_KR' and encoding == 'cp949':
+    if WINDOWS and (language == 'ko' or (language == 'ko_KR' and encoding == 'cp949')):
         # The default encoding for the Korean language in Windows is cp949,
         # Microsoft's proprietary extension to euc-kr, but gettext prints no
         # translated messages at all in the Command Prompt window if LC_CTYPE
         # is set to ko_KR.cp949. Here, force LC_CTYPE to be euc-kr.
         normalized = 'euc-kr'
         encoding = None
+
+        # XXX: In UN*X, LC_CTYPE needs to be set to *any* value before GRASS
+        # starts when the language setting is overriden by the user. For
+        # example, 'LC_CTYPE= grass' will break the welcome message.
+        # Interestingly, modules' help messages look fine.
     elif encoding:
         normalized = locale.normalize('%s.%s' % (language, encoding))
     else:
@@ -1985,10 +1990,10 @@ def print_params():
     """Write compile flags and other configuration to stderr"""
     params = sys.argv[2:]
     if not params:
-        params = ['arch', 'build', 'compiler', 'path', 'revision', 'version']
+        params = ['arch', 'build', 'compiler', 'path', 'revision', 'version', 'date']
 
     # check if we are dealing with parameters which require dev files
-    dev_params = ["arch", "compiler", "build", "revision"]
+    dev_params = ["arch", "compiler", "build", "date"]
     if any([param in dev_params for param in params]):
         plat = gpath('include', 'Make', 'Platform.make')
         if not os.path.exists(plat):
@@ -2014,13 +2019,7 @@ def print_params():
             val = grep('CC', linesplat)
             sys.stdout.write("%s\n" % val[0].split('=')[1].strip())
         elif arg == 'revision':
-            rev = gpath('include', 'grass', 'gis.h')
-            filerev = open(rev)
-            linesrev = filerev.readlines()
-            val = grep('#define GIS_H_VERSION', linesrev)
-            filerev.close()
-            sys.stdout.write(
-                "%s\n" % val[0].split(':')[1].rstrip('$"\n').strip())
+            sys.stdout.write("@GRASS_VERSION_GIT@\n")
         elif arg == 'svn_revision':
             filerev = open(gpath('etc', 'VERSIONNUMBER'))
             linerev = filerev.readline().rstrip('\n')
@@ -2032,6 +2031,16 @@ def print_params():
                sys.stdout.write("No SVN revision defined\n")
         elif arg == 'version':
             sys.stdout.write("%s\n" % GRASS_VERSION)
+        elif arg == 'date':
+            date_str = "#define GRASS_HEADERS_DATE "
+            gdate = gpath('include', 'grass', 'version.h')
+            with open(gdate) as filegdate:
+                for line in filegdate.readlines():
+                    if line.startswith(date_str):
+                        sys.stdout.write('{}\n'.format(
+                            line.replace(date_str, '').lstrip()[1:-2]) # remove quotes
+                        )
+                        break
         else:
             message(_("Parameter <%s> not supported") % arg)
 

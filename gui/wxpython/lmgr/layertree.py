@@ -37,18 +37,16 @@ from gui_core.dialogs import SqlQueryFrame, SetOpacityDialog, TextEntryDialog
 from gui_core.forms import GUI
 from mapdisp.frame import MapFrame
 from core.render import Map
-from wxplot.histogram import HistogramPlotFrame
 from core.utils import GetLayerNameFromCmd, ltype2command
 from core.debug import Debug
 from core.settings import UserSettings, GetDisplayVectSettings
 from vdigit.main import haveVDigit
 from core.gcmd import GWarning, GError, RunCommand
 from icons.icon import MetaIcon
-from web_services.dialogs import SaveWMSLayerDialog
 from gui_core.widgets import MapValidator
 from gui_core.wrap import Menu, GenBitmapButton, TextCtrl, NewId
 from lmgr.giface import LayerManagerGrassInterfaceForMapDisplay
-from core.giface import Notification
+
 
 TREE_ITEM_HEIGHT = 25
 
@@ -898,6 +896,7 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
     def OnSaveWs(self, event):
         """Show dialog for saving web service layer into GRASS vector/raster layer"""
         mapLayer = self.GetLayerInfo(self.layer_selected, key='maplayer')
+        from web_services.dialogs import SaveWMSLayerDialog
         dlg = SaveWMSLayerDialog(parent=self, layer=mapLayer,
                                  giface=self._gifaceForDisplay)
         dlg.CentreOnScreen()
@@ -1136,6 +1135,8 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
                              "raster map. No map name defined."))
             return
 
+        # lazy import to reduce dependecies and startup
+        from wxplot.histogram import HistogramPlotFrame
         win = HistogramPlotFrame(parent=self, giface=self._giface, rasterList=rasterList)
         win.CentreOnScreen()
         win.Show()
@@ -1341,7 +1342,7 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
 
         selectedLayer = self.GetSelectedLayer()
         # deselect active item
-        if lchecked != False and selectedLayer:
+        if lchecked is not False and selectedLayer:
             self.SelectItem(selectedLayer, select=False)
 
         Debug.msg(3, "LayerTree().AddLayer(): ltype=%s" % (ltype))
@@ -1508,7 +1509,7 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
                                    None))
 
         # select new item
-        if lchecked != False:
+        if lchecked is not False:
             self.SelectItem(layer, select=True)
 
         # use predefined layer name if given
