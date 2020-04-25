@@ -18,7 +18,7 @@
 #               command line options for setting the GISDBASE, LOCATION,
 #               and/or MAPSET. Finally it starts GRASS with the appropriate
 #               user interface and cleans up after it is finished.
-# COPYRIGHT:    (C) 2000-2019 by the GRASS Development Team
+# COPYRIGHT:    (C) 2000-2020 by the GRASS Development Team
 #
 #               This program is free software under the GNU General
 #               Public License (>=v2). Read the file COPYING that
@@ -54,6 +54,7 @@ import platform
 import tempfile
 import locale
 import uuid
+import unicodedata
 
 
 # mechanism meant for debugging this script (only)
@@ -262,6 +263,43 @@ def wxpath(*args):
         # this can be called only after GISBASE was set
         _WXPYTHON_BASE = gpath("gui", "wxpython")
     return os.path.join(_WXPYTHON_BASE, *args)
+
+
+def count_wide_chars(s):
+    """Returns the number of wide CJK characters in a string.
+
+    :param str s: string
+    """
+    return sum(unicodedata.east_asian_width(c) in 'WF' for c in
+            (s if sys.version_info.major >= 3 else unicode(s)))
+
+
+def f(fmt, *args):
+    """Adjusts fixed-width string specifiers for wide CJK characters and
+    returns a formatted string. Does not support named arguments yet.
+
+    :param str fmt: format string
+    :param *args: arguments for the format string
+    """
+    matches = []
+    # https://docs.python.org/3/library/stdtypes.html#old-string-formatting
+    for m in re.finditer('%([#0 +-]*)([0-9]*)(\.[0-9]*)?([hlL]?[diouxXeEfFgGcrsa%])', fmt):
+        matches.append(m)
+
+    if len(matches) != len(args):
+        raise Exception('The numbers of format specifiers and arguments do not match')
+
+    i = len(args) - 1
+    for m in reversed(matches):
+        f = m.group(1)
+        w = m.group(2)
+        p = m.group(3) or ''
+        c = m.group(4)
+        if c == 's' and w:
+            w = str(int(w) - count_wide_chars(args[i]))
+            fmt = ''.join((fmt[:m.start()], '%', f, w, p, c, fmt[m.end():]))
+        i -= 1
+    return fmt % args
 
 
 # using format for most but leaving usage of template for the dynamic ones
@@ -518,8 +556,8 @@ def read_env_file(path):
     return kv
 
 
-def write_gisrc(kv, filename):
-    f = open(filename, 'w')
+def write_gisrc(kv, filename, append=False):
+    f = open(filename, 'a' if append else 'w')
     for k, v in kv.items():
         f.write("%s: %s\n" % (k, v))
     f.close()
@@ -794,9 +832,13 @@ def create_location(gisdbase, location, geostring):
     :param location: name of new Location
     :param geostring: path to a georeferenced file or EPSG code
     """
+    global _
     if gpath('etc', 'python') not in sys.path:
         sys.path.append(gpath('etc', 'python'))
+    # importing the core module installs a new _() function?
+    __ = _
     from grass.script import core as gcore  # pylint: disable=E0611
+    _ = __
 
     try:
         if geostring and geostring.upper().find('EPSG:') > -1:
@@ -1742,9 +1784,13 @@ def start_gui(grass_gui):
 
 def close_gui():
     """Close GUI if running"""
+    global _
     if gpath('etc', 'python') not in sys.path:
         sys.path.append(gpath('etc', 'python'))
+    # importing the core module installs a new _() function?
+    __ = _
     from grass.script import core as gcore  # pylint: disable=E0611
+    _ = __
     env = gcore.gisenv()
     if 'GUI_PID' not in env:
         return
@@ -1794,7 +1840,7 @@ INFO_TEXT = r"""
 
 def show_info(shellname, grass_gui, default_gui):
     """Write basic info about GRASS GIS and GRASS session to stderr"""
-    sys.stderr.write(INFO_TEXT % (
+    sys.stderr.write(f(INFO_TEXT,
         _("GRASS GIS homepage:"),
         # GTC Running through: SHELL NAME
         _("This version running through:"),
@@ -1804,11 +1850,11 @@ def show_info(shellname, grass_gui, default_gui):
         _("See citation options with:")))
 
     if grass_gui == 'wxpython':
-        message("%-41sg.gui wxpython" % _("If required, restart the GUI with:"))
+        message(f("%-41sg.gui wxpython", _("If required, restart the GUI with:")))
     else:
-        message("%-41sg.gui %s" % (_("Start the GUI with:"), default_gui))
+        message(f("%-41sg.gui %s", _("Start the GUI with:"), default_gui))
 
-    message("%-41sexit" % _("When ready to quit enter:"))
+    message(f("%-41sexit", _("When ready to quit enter:")))
     message("")
 
 
@@ -2374,9 +2420,9 @@ def main():
 
         # start GUI and register shell PID in rc file
         start_gui(grass_gui)
-        kv = read_gisrc(gisrc)
+        kv = {}
         kv['PID'] = str(shell_process.pid)
-        write_gisrc(kv, gisrc)
+        write_gisrc(kv, gisrc, True)
         exit_val = shell_process.wait()
         if exit_val != 0:
             warning(_("Failed to start shell '%s'") % os.getenv('SHELL'))
