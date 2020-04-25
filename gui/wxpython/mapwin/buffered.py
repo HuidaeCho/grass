@@ -1597,8 +1597,8 @@ class BufferedMapWindow(MapWindowBase, Window):
             # redraw map
             self.UpdateMap(render=False)
 
-       # TODO: decide which coordinates to send (e, n, mouse['begin'],
-       # mouse['end'])
+        # TODO: decide which coordinates to send (e, n, mouse['begin'],
+        # mouse['end'])
         self.mouseLeftUp.emit(x=coordinates[0], y=coordinates[1])
 
     def OnButtonDClick(self, event):
@@ -1615,7 +1615,7 @@ class BufferedMapWindow(MapWindowBase, Window):
                 screenCoords[0],
                 screenCoords[1],
                 self.hitradius)
-            if idlist:
+            if idlist and idlist[0] != 99:
                 self.dragid = idlist[0]
                 self.overlayActivated.emit(overlayId=self.dragid)
 
