@@ -12558,7 +12558,7 @@ msgid "Do you want to record new animation without saving the previous one?"
 msgstr "Vuoi registrare una nuova animazione senza salvare la precedente?"
 
 #: ../gui/wxpython/nviz/tools.py:2486
-msgid "Animation already axists"
+msgid "Animation already exists"
 msgstr "Animazione già esistente"
 
 #: ../gui/wxpython/nviz/tools.py:2656
@@ -16044,6 +16044,7 @@ msgid "Edit"
 msgstr "Modifica"
 
 #: ../gui/wxpython/animation/dialogs.py:841
+#: ../gui/wxpython/animation/controller.py:234
 #, python-format
 msgid "Maximum number of animations is %d."
 msgstr "Il numero massimo di animazioni è %d."
@@ -16322,11 +16323,6 @@ msgstr "Il numero di mappe da animare deve essere lo stesso per ogni serie di ma
 #: ../gui/wxpython/animation/utils.py:210
 msgid "The number of maps to animate has to be the same as the number of maps in temporal dataset."
 msgstr "Il numero di mappe da animare deve essere uguale al numero di mappe nel dataset temporale."
-
-#: ../gui/wxpython/animation/controller.py:234
-#, python-format
-msgid "Maximum number of animations is %s."
-msgstr "Numero massimo di animazioni è %s."
 
 #: ../gui/wxpython/animation/controller.py:443
 msgid "Failed to display legend."
@@ -20878,3 +20874,6 @@ msgstr "Crea un raster da punti LAS LiDAR usando statistiche univariate"
 
 msgid "Converts LAS LiDAR point clouds to a GRASS vector map with libLAS."
 msgstr "Converte nuvole di punti LAS LiDAR in un vettoriale GRASS usando libLAS."
+
+#~ msgid "Animation already axists"
+#~ msgstr "Animazione già esistente"
