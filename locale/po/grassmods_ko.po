@@ -5491,7 +5491,7 @@ msgstr ""
 #: ../ps/ps.map/do_labels.c:44
 #, c-format
 msgid "Can't open label file <%s> in mapset <%s>"
-msgstr "지도세트 <%2$s> 내 꼬리표 파일 <%1$s>를 열 수 없습니다"
+msgstr "지도 세트 <%2$s> 내 꼬리표 파일 <%1$s>를 열 수 없습니다"
 
 #: ../ps/ps.map/do_labels.c:48
 #, c-format
@@ -12940,12 +12940,12 @@ msgstr ""
 #: ../raster/r.compress/main.c:134
 #, c-format
 msgid "<%s> is a reclass file of map <%s> in mapset <%s> - can't uncompress"
-msgstr "<%1$s>는 지도세트 <%3$s> 내 지도 <%2$s>의 재분류 파일입니다 - 압축해제할 수 없습니다"
+msgstr "<%1$s>는 지도 세트 <%3$s> 내 지도 <%2$s>의 재분류 파일입니다 - 압축해제할 수 없습니다"
 
 #: ../raster/r.compress/main.c:136
 #, c-format
 msgid "<%s> is a reclass file of map <%s> in mapset <%s> - can't compress"
-msgstr "<%1$s>는 지도세트 <%3$s> 내 지도 <%2$s>의 재분류 파일입니다 - 압축할 수 없습니다"
+msgstr "<%1$s>는 지도 세트 <%3$s> 내 지도 <%2$s>의 재분류 파일입니다 - 압축할 수 없습니다"
 
 #: ../raster/r.compress/main.c:141
 #, c-format
@@ -22647,11 +22647,11 @@ msgstr "지도 이름 제외패턴 (기본값: 없음)"
 
 #: ../general/g.list/main.c:100
 msgid "Name of mapset to list (default: current search path)"
-msgstr "나열할 지도세트의 이름 (기본값: 현재 검색경로)"
+msgstr "나열할 지도 세트의 이름 (기본값: 현재 검색 경로)"
 
 #: ../general/g.list/main.c:102
 msgid "'.' for current mapset; '*' for all mapsets in location"
-msgstr "현재 지도세트 '.'; 로케이션 안의 모든 지도세트 '*'"
+msgstr "현재 지도 세트 '.'; 로케이션 안의 모든 지도 세트 '*'"
 
 #: ../general/g.list/main.c:108
 msgid "Name of saved region for map search (default: not restricted)"
@@ -22683,7 +22683,7 @@ msgstr "자료형을 출력합니다"
 
 #: ../general/g.list/main.c:142
 msgid "Print fully-qualified map names (including mapsets)"
-msgstr "지도세트를 포함한 완전한 지도 이름을 출력합니다"
+msgstr "지도 세트를 포함한 완전한 지도 이름을 출력합니다"
 
 #: ../general/g.list/main.c:147
 msgid "Pretty printing in human readable format"
@@ -23098,7 +23098,7 @@ msgstr "<%s> GUI를 배경프로세스에서 시작합니다. 기다려주세요
 
 #: ../general/g.rename/main.c:49
 msgid "Renames data base element files in the user's current mapset."
-msgstr "사용자의 현재 지도세트 안에 있는 데이터베이스 요소파일들의 이름을 바꿉니다."
+msgstr "사용자의 현재 지도 세트 안에 있는 데이터베이스 요소파일들의 이름을 바꿉니다."
 
 #: ../general/g.rename/main.c:55
 msgid "renamed"
@@ -23112,7 +23112,7 @@ msgstr "%s <%s>를 찾을 수 없습니다"
 #: ../general/g.rename/main.c:80
 #, c-format
 msgid "<%s> already exists in mapset <%s>"
-msgstr "<%s>가 지도세트 <%s> 안에 이미 존재합니다."
+msgstr "<%s>가 지도 세트 <%s> 안에 이미 존재합니다."
 
 #: ../general/g.rename/main.c:90
 #, c-format
@@ -23140,19 +23140,19 @@ msgstr ""
 
 #: ../general/g.mapsets/main.c:65
 msgid "search path"
-msgstr "검색경로"
+msgstr "검색 경로"
 
 #: ../general/g.mapsets/main.c:66
 msgid "Modifies/prints the user's current mapset search path."
-msgstr "사용자의 지도세트 검색경로를 수정하거나 출력합니다."
+msgstr "사용자의 지도 세트 검색 경로를 수정하거나 출력합니다."
 
 #: ../general/g.mapsets/main.c:67
 msgid "Affects the user's access to data existing under the other mapsets in the current location."
-msgstr "현재 로케이션 안에 있는 다른 지도세트 내에 존재하는 자료에 관한 사용자의 접근에 영향을 미칩니다."
+msgstr "현재 로케이션 안에 있는 다른 지도 세트 내에 존재하는 자료에 관한 사용자의 접근에 영향을 미칩니다."
 
 #: ../general/g.mapsets/main.c:73
 msgid "Name(s) of existing mapset(s) to add/remove or set"
-msgstr "추가/제거 또는 설정하고 싶은 기존 지도세트의 이름"
+msgstr "추가/제거 또는 설정하고 싶은 기존 지도 세트의 이름"
 
 #: ../general/g.mapsets/main.c:85
 msgid "Field separator for printing (-l and -p flags)"
@@ -23160,15 +23160,15 @@ msgstr "출력을 위한 필드구분자(-l과 -p 플래그)"
 
 #: ../general/g.mapsets/main.c:91
 msgid "List all available mapsets in alphabetical order"
-msgstr "모든 지도세트을 알파벳순으로 나열합니다"
+msgstr "모든 지도 세트을 알파벳순으로 나열합니다"
 
 #: ../general/g.mapsets/main.c:97
 msgid "Print mapsets in current search path"
-msgstr "검색경로에 있는 지도세트을 출력합니다"
+msgstr "검색 경로에 있는 지도 세트을 출력합니다"
 
 #: ../general/g.mapsets/main.c:103
 msgid "Launch mapset selection GUI dialog"
-msgstr "지도세트 선택을 위한 GUI 대화 상자를 시작합니다"
+msgstr "지도 세트 선택을 위한 GUI 대화 상자를 시작합니다"
 
 #: ../general/g.mapsets/main.c:126
 #, c-format
@@ -23178,31 +23178,31 @@ msgstr "알려지지 않은 조작 '%s'"
 #: ../general/g.mapsets/main.c:174 ../general/g.mapsets/main.c:208
 #, c-format
 msgid "Mapset <%s> not found"
-msgstr "지도세트 <%s>를 찾을 수 없습니다"
+msgstr "지도 세트 <%s>를 찾을 수 없습니다"
 
 #: ../general/g.mapsets/main.c:181 ../general/g.mapsets/main.c:240
 #, c-format
 msgid "Current mapset (<%s>) must always included in the search path"
-msgstr "현재 지도세트(<%s>)가 반드시 검색경로에 포함되어야 합니다"
+msgstr "현재 지도 세트(<%s>)가 반드시 검색 경로에 포함되어야 합니다"
 
 #: ../general/g.mapsets/main.c:203
 #, c-format
 msgid "Mapset <%s> already in the path"
-msgstr "지도세트 <%s>가 경로에 이미 존재합니다"
+msgstr "지도 세트 <%s>가 경로에 이미 존재합니다"
 
 #: ../general/g.mapsets/main.c:210
 #, c-format
 msgid "Mapset <%s> added to search path"
-msgstr "지도세트 <%s>를 검색경로에 추가했습니다"
+msgstr "지도 세트 <%s>를 검색 경로에 추가했습니다"
 
 #: ../general/g.mapsets/main.c:243
 #, c-format
 msgid "Mapset <%s> removed from search path"
-msgstr "지도세트 <%s>를 검색경로에서 제거했습니다"
+msgstr "지도 세트 <%s>를 검색 경로에서 제거했습니다"
 
 #: ../general/g.mapsets/main.c:255
 msgid "Search path not modified"
-msgstr "검색경로가 수정되지 않았습니다"
+msgstr "검색 경로가 수정되지 않았습니다"
 
 #: ../general/g.mapsets/main.c:273
 msgid "Unable to open SEARCH_PATH for write"
@@ -23210,11 +23210,11 @@ msgstr "SEARCH_PATH를 쓰기 위해 열 수 없습니다"
 
 #: ../general/g.mapsets/list.c:10
 msgid "Available mapsets:"
-msgstr "유효한 지도세트들:"
+msgstr "유효한 지도 세트들:"
 
 #: ../general/g.mapsets/list.c:35
 msgid "Accessible mapsets:"
-msgstr "접근 가능한 지도세트들:"
+msgstr "접근 가능한 지도 세트들:"
 
 #: ../general/g.pnmcomp/main.c:54
 msgid "Error reading PPM file"
@@ -23272,7 +23272,7 @@ msgstr ""
 
 #: ../general/g.copy/main.c:44
 msgid "Copies available data files in the current mapset search path to the user's current mapset."
-msgstr "지도세트 검색경로에 있는 자료파일을 사용자의 현재지도세트로 복사합니다."
+msgstr "지도 세트 검색 경로에 있는 자료파일을 사용자의 현재지도 세트로 복사합니다."
 
 #: ../general/g.copy/main.c:51
 msgid "copied"
@@ -23490,7 +23490,7 @@ msgstr "투영 정보가 갱신되었습니다"
 
 #: ../general/g.mapset/main.c:51
 msgid "Changes/reports current mapset."
-msgstr "현재 지도세트를 바꾸거나 보고합니다."
+msgstr "현재 지도 세트를 바꾸거나 보고합니다."
 
 #: ../general/g.mapset/main.c:52
 msgid "Optionally create new mapset or list available mapsets in given location."
@@ -23544,7 +23544,7 @@ msgstr ""
 #: ../general/g.mapset/main.c:182
 #, c-format
 msgid "Lock file of mapset <%s> cannot be checked"
-msgstr "지도세트 <%s>의 잠금 파일을 검사할 수 없습니다"
+msgstr "지도 세트 <%s>의 잠금 파일을 검사할 수 없습니다"
 
 #: ../general/g.mapset/main.c:185
 #, c-format
@@ -23726,7 +23726,7 @@ msgstr "로케이션의 투영설정을 대화식으로 재설정합니다."
 
 #: ../general/g.setproj/main.c:88
 msgid "You must be in the PERMANENT mapset to run g.setproj"
-msgstr "g.setproj를 실행하기 위해서는 PERMANENT 지도세트 안에 있어야 합니다"
+msgstr "g.setproj를 실행하기 위해서는 PERMANENT 지도 세트 안에 있어야 합니다"
 
 #: ../general/g.setproj/main.c:101
 msgid "PERMANENT: permission denied"
@@ -23956,7 +23956,7 @@ msgstr "당신만이"
 #: ../general/g.access/exp_perms.c:31
 #, c-format
 msgid "%s %s %s %saccess to mapset %s"
-msgstr "%1$s 지도세트 %5$s에 관한 %4$s권한을 %2$s %3$s"
+msgstr "%1$s 지도 세트 %5$s에 관한 %4$s권한을 %2$s %3$s"
 
 #: ../general/g.access/exp_perms.c:32
 msgid "will"
@@ -23972,7 +23972,7 @@ msgstr "허가"
 
 #: ../general/g.access/main.c:41
 msgid "Controls access to the current mapset for other users on the system."
-msgstr "시스템상 다른 사용자의 현재 지도세트에 관한 접근을 제어합니다."
+msgstr "시스템상 다른 사용자의 현재 지도 세트에 관한 접근을 제어합니다."
 
 #: ../general/g.access/main.c:42
 msgid "If no option given, prints current status."
@@ -23992,15 +23992,15 @@ msgstr "MS 윈도우는 유닉스 파일시스템의 접근제한을 지원하�
 
 #: ../general/g.access/main.c:72
 msgid "Access to the PERMANENT mapset must be open, nothing changed"
-msgstr "PERMANENT 지도세트에 관한 접근은 열려 있어야 합니다. 아무것도 바꾸지 않았습니다."
+msgstr "PERMANENT 지도 세트에 관한 접근은 열려 있어야 합니다. 아무것도 바꾸지 않았습니다."
 
 #: ../general/g.access/main.c:76
 msgid "Unable to determine mapset permissions"
-msgstr "지도세트의 허가를 결정할 수 없습니다"
+msgstr "지도 세트의 허가를 결정할 수 없습니다"
 
 #: ../general/g.access/set_perms.c:26
 msgid "Unable to change mapset permissions"
-msgstr "지도세트의 허가를 바꿀 수 없습니다"
+msgstr "지도 세트의 허가를 바꿀 수 없습니다"
 
 #: ../general/g.filename/main.c:42
 msgid "Prints GRASS data base file names."
@@ -24032,7 +24032,7 @@ msgstr "<%s@%s>로부터 재분류된 지도에 관한 정보를 삭제하는데
 
 #: ../general/g.remove/main.c:73
 msgid "Removes data base element files from the user's current mapset using the search pattern."
-msgstr "검색패턴을 이용해서 사용자의 현재 지도세트로부터 데이터베이스 요소파일을 제거합니다."
+msgstr "검색패턴을 이용해서 사용자의 현재 지도 세트로부터 데이터베이스 요소파일을 제거합니다."
 
 #: ../general/g.remove/main.c:83 ../general/g.remove/main.c:91
 #: ../general/g.remove/main.c:133 ../vector/v.kernel/main.c:121
@@ -24076,7 +24076,7 @@ msgstr "아무것도 제거되지 않았습니다. 실제로 제거하기 위해
 #: ../general/g.remove/construct_pattern.c:37
 #, c-format
 msgid "%s: Cannot remove or exclude files not in the current mapset."
-msgstr "%s: 현재 지도세트 안에 있지 않은 파일은 제거하거나 배제할 수 없습니다."
+msgstr "%s: 현재 지도 세트 안에 있지 않은 파일은 제거하거나 배제할 수 없습니다."
 
 #: ../general/g.remove/construct_pattern.c:57
 msgid "Illegal filenames not allowed in the name or ignore option."
@@ -24844,7 +24844,7 @@ msgstr ""
 #: ../imagery/i.cluster/main.c:169
 #, c-format
 msgid "Group <%s> not found in current mapset"
-msgstr "현재 지도세트 안에서 그룹 <%s>를 찾을 수 없습니다"
+msgstr "현재 지도 세트 안에서 그룹 <%s>를 찾을 수 없습니다"
 
 #: ../imagery/i.gensig/parse.c:44 ../imagery/i.maxlik/open.c:20
 #: ../imagery/i.smap/parse.c:64 ../imagery/i.gensigset/parse.c:50
@@ -39195,7 +39195,7 @@ msgstr "이름:"
 
 #: ../vector/v.info/print.c:320
 msgid "Mapset:"
-msgstr "지도세트:"
+msgstr "지도 세트:"
 
 #: ../vector/v.info/print.c:324
 msgid "Location:"
@@ -39223,7 +39223,7 @@ msgstr "기관:"
 
 #: ../vector/v.info/print.c:344
 msgid "Source date:"
-msgstr "원천 날짜:"
+msgstr "원천 자료 날짜:"
 
 #: ../vector/v.info/print.c:351
 msgid "Timestamp (first layer): "
@@ -39746,7 +39746,7 @@ msgstr ""
 #: ../vector/v.vect.stats/main.c:280
 #, c-format
 msgid "Vector map <%s> is not in user mapset and cannot be updated"
-msgstr "벡터 지도 <%s>가 사용자 지도세트 내에 존재하지 않으므로 갱신할 수 없습니다"
+msgstr "벡터 지도 <%s>가 사용자 지도 세트 내에 존재하지 않으므로 갱신할 수 없습니다"
 
 #: ../vector/v.vect.stats/main.c:346
 msgid "count_column is required to upload point counts"
@@ -41094,7 +41094,7 @@ msgstr ""
 #: ../vector/v.to.db/main.c:56
 #, c-format
 msgid "Vector map <%s> not found in the current mapset. Unable to modify vector maps from different mapsets."
-msgstr "벡터 지도 <%s>를 현재 지도세트 내에서 찾을 수 없습니다. 다른 지도세트 내에 있는 벡터 지도는 수정할 수 없습니다."
+msgstr "벡터 지도 <%s>를 현재 지도 세트 내에서 찾을 수 없습니다. 다른 지도 세트 내에 있는 벡터 지도는 수정할 수 없습니다."
 
 #: ../vector/v.to.db/main.c:73 ../vector/v.to.db/main.c:80
 #: ../vector/v.to.db/update.c:30 ../vector/v.to.db/update.c:34
@@ -41573,7 +41573,7 @@ msgstr "제거할 기존 마스크가 없습니다"
 
 #: ../scripts/r.mask/r.mask.py:123
 msgid "MASK already found in current mapset. Delete first or overwrite."
-msgstr "현재 지도세트 안에 마스크가 이미 존재합니다. 먼저 삭제하거나 덮어쓰세요."
+msgstr "현재 지도 세트 안에 마스크가 이미 존재합니다. 먼저 삭제하거나 덮어쓰세요."
 
 #: ../scripts/r.mask/r.mask.py:125
 msgid "MASK already exists and will be overwritten"

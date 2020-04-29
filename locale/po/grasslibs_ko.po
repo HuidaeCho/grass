@@ -140,12 +140,12 @@ msgstr "<%s> 아무것도 제거하지 않았습니다"
 #: ../lib/manage/do_copy.c:43
 #, c-format
 msgid "Copy %s <%s> to current mapset as <%s>"
-msgstr "%s <%s>를 현재 지도세트의 <%s>로 복사합니다"
+msgstr "%s <%s>를 현재 지도 세트의 <%s>로 복사합니다"
 
 #: ../lib/manage/do_copy.c:50 ../lib/manage/do_copy.c:67
 #, c-format
 msgid "Unable to copy <%s> to current mapset as <%s>"
-msgstr "<%s>를 현재 지도세트의 <%s>로 복사할 수 없습니다"
+msgstr "<%s>를 현재 지도 세트의 <%s>로 복사할 수 없습니다"
 
 #: ../lib/manage/do_copy.c:72
 #, c-format
@@ -205,7 +205,7 @@ msgstr "프로그래머 오류 - 현재 SQLite 드라이버만 지원합니다"
 #: ../lib/temporal/lib/connect.c:110
 #, c-format
 msgid "Mapset <%s> does not exist."
-msgstr "지도세트 <%s>가 존재하지 않습니다."
+msgstr "지도 세트 <%s>가 존재하지 않습니다."
 
 #: ../lib/rowio/setup.c:61 ../lib/rowio/setup.c:67 ../lib/segment/open.c:118
 #: ../lib/rst/interp_float/segmen2d_parallel.c:78
@@ -1662,7 +1662,7 @@ msgstr "시간 데이터베이스로부터 시공간 %s 자료세트 <%s>를 삭
 #: ../lib/python/temporal/abstract_map_dataset.py:841
 #, python-format
 msgid "Unable to delete dataset <%(ds)s> of type %(type)s from the temporal database. The mapset of the dataset does not match the current mapset"
-msgstr "시간 데이터베이스로부터 타입 %(type)s의 자료세트 <%(ds)s>를 삭제할 수 없습니다. 자료세트의 지도세트가 현재 지도세트와 일치하지 않습니다"
+msgstr "시간 데이터베이스로부터 타입 %(type)s의 자료세트 <%(ds)s>를 삭제할 수 없습니다. 자료세트의 지도 세트가 현재 지도 세트와 일치하지 않습니다"
 
 #: ../lib/python/temporal/abstract_space_time_dataset.py:1973
 #, python-format
@@ -2467,7 +2467,7 @@ msgstr "누락된 식별자"
 
 #: ../lib/python/temporal/base.py:621
 msgid "Wrong identifier, the mapset is missing"
-msgstr "틀린 식별자, 지도세트가 없습니다"
+msgstr "틀린 식별자, 지도 세트가 없습니다"
 
 #: ../lib/python/temporal/space_time_datasets.py:251
 #, python-format
@@ -2820,7 +2820,7 @@ msgstr ""
 
 #: ../lib/python/script/core.py:1507
 msgid "Unable to list mapsets"
-msgstr "지도세트를 나열할 수 없습니다"
+msgstr "지도 세트를 나열할 수 없습니다"
 
 #: ../lib/python/script/core.py:1546
 #, python-format
@@ -3082,7 +3082,7 @@ msgstr "Rast3d_open_cell_new: Rast3d_malloc 내에 오류"
 #: ../lib/raster3d/open.c:233
 #, c-format
 msgid "map <%s> is not in the current mapset"
-msgstr "지도 <%s>는 현재 지도세트 안에 있지 않습니다"
+msgstr "지도 <%s>는 현재 지도 세트 안에 있지 않습니다"
 
 #: ../lib/raster3d/open.c:243
 msgid "Rast3d_open_cell_new: could not open file"
@@ -3158,12 +3158,12 @@ msgstr "캐시 내에 오류"
 #: ../lib/raster3d/history.c:43
 #, c-format
 msgid "can't get history information for [%s] in mapset [%s]"
-msgstr "지도세트 [%2$s] 안의 [%1$s]를 위한 히스토리 정보를 읽을 수 없습니다"
+msgstr "지도 세트 [%2$s] 안의 [%1$s]를 위한 히스토리 정보를 읽을 수 없습니다"
 
 #: ../lib/raster3d/color.c:354
 #, c-format
 msgid "mapset <%s> is not the current mapset"
-msgstr "지도세트 <%s>는 현재 지도세트가 아닙니다"
+msgstr "지도 세트 <%s>는 현재 지도 세트가 아닙니다"
 
 #: ../lib/cluster/c_exec.c:44
 #, c-format
@@ -3771,7 +3771,7 @@ msgstr ""
 #: ../lib/init/grass.py:938
 #, python-brace-format
 msgid "Mapset <{mapset}> or Location <{location}> is invalid for an unknown reason"
-msgstr "지도세트 <{mapset}> 또는 로케이션 <{location}>이 알려지지 않은 이유로 무효합니다"
+msgstr "지도 세트 <{mapset}> 또는 로케이션 <{location}>이 알려지지 않은 이유로 무효합니다"
 
 #: ../lib/init/grass.py:963
 #, python-brace-format
@@ -7424,7 +7424,7 @@ msgstr ""
 
 #: ../lib/vector/Vlib/open.c:277
 msgid "Vector map which is not in the current mapset cannot be opened for update"
-msgstr "현재 지도세트 내에 존재하지 않는 벡터 지도는 갱신을 위해 열 수 없습니다"
+msgstr "현재 지도 세트 내에 존재하지 않는 벡터 지도는 갱신을 위해 열 수 없습니다"
 
 #: ../lib/vector/Vlib/open.c:311
 #, c-format
@@ -8293,7 +8293,7 @@ msgstr ""
 #: ../lib/vector/Vlib/map.c:403
 #, c-format
 msgid "Ignoring invalid mapset: %s"
-msgstr "무효한 지도세트를 무시합니다: %s"
+msgstr "무효한 지도 세트를 무시합니다: %s"
 
 #: ../lib/vector/Vlib/map.c:408
 #, c-format

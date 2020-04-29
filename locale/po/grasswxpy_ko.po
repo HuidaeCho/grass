@@ -360,7 +360,7 @@ msgstr "데이터베이스 연결이 정의되지 않았습니다"
 #: ../gui/wxpython/modules/colorrules.py:1349
 #, python-format
 msgid "Selected map <%(map)s> is not in current mapset <%(mapset)s>. Attribute table cannot be edited."
-msgstr "선택된 지도 <%(map)s>가 현재 지도세트 <%(mapset)s> 내에 존재하지 않습니다. 속성 테이블을 편집할 수 없습니다."
+msgstr "선택된 지도 <%(map)s>가 현재 지도 세트 <%(mapset)s> 내에 존재하지 않습니다. 속성 테이블을 편집할 수 없습니다."
 
 #: ../gui/wxpython/modules/colorrules.py:1520
 #, python-format
@@ -3899,7 +3899,7 @@ msgstr "2. GRASS 로케이션을 선택하세요"
 #: ../gui/wxpython/gis_set.py:121
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:128
 msgid "3. Select GRASS Mapset"
-msgstr "3. GRASS 지도세트를 선택하세요"
+msgstr "3. GRASS 지도 세트를 선택하세요"
 
 #: ../gui/wxpython/gis_set.py:139
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:146
@@ -3909,12 +3909,12 @@ msgstr "GRASS GIS 데이터베이스 디렉토리는 로케이션을 포함합�
 #: ../gui/wxpython/gis_set.py:143
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:150
 msgid "All data in one Location is in the same  coordinate reference system (projection). One Location can be one project. Location contains Mapsets."
-msgstr "한 로케이션 내의 모든 자료는 같은 투영을 공유합니다. 로케이션 하나가 프로젝트 하나가 될 수 있습니다. 로케이션은 지도세트를 포함합니다."
+msgstr "한 로케이션 내의 모든 자료는 같은 투영을 공유합니다. 로케이션 하나가 프로젝트 하나가 될 수 있습니다. 로케이션은 지도 세트를 포함합니다."
 
 #: ../gui/wxpython/gis_set.py:151
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:158
 msgid "Mapset contains GIS data related to one project, task within one project, subregion or user."
-msgstr "지도세트는 프로젝트, 작업, 부영역 또는 사용자와 관련된 GIS 자료를 포함합니다."
+msgstr "지도 세트는 프로젝트, 작업, 부영역 또는 사용자와 관련된 GIS 자료를 포함합니다."
 
 #: ../gui/wxpython/gis_set.py:166
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:173
@@ -4004,7 +4004,7 @@ msgstr "삭제(&D)"
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:207
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:725
 msgid "Delete selected mapset"
-msgstr "선택된 지도세트를 삭제합니다"
+msgstr "선택된 지도 세트를 삭제합니다"
 
 #: ../gui/wxpython/gis_set.py:258
 #, python-format
@@ -4077,9 +4077,9 @@ msgid ""
 "\n"
 "This mapset cannot be renamed."
 msgstr ""
-"유효한 GRASS 로케이션을 위해서는 지도세트 <PERMANENT>가 필요합니다.\n"
+"유효한 GRASS 로케이션을 위해서는 지도 세트 <PERMANENT>가 필요합니다.\n"
 "\n"
-"이 지도세트의 이름은 바꿀 수 없습니다."
+"이 지도 세트의 이름은 바꿀 수 없습니다."
 
 #: ../gui/wxpython/gis_set.py:624 ../gui/wxpython/gis_set.py:667
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:625
@@ -4134,9 +4134,9 @@ msgid ""
 "\n"
 "This mapset cannot be deleted."
 msgstr ""
-"유효한 GRASS 로케이션을 위해서는 지도세트 <PERMANENT>가 필요합니다.\n"
+"유효한 GRASS 로케이션을 위해서는 지도 세트 <PERMANENT>가 필요합니다.\n"
 "\n"
-"이 지도세트는 삭제할 수 없습니다."
+"이 지도 세트는 삭제할 수 없습니다."
 
 #: ../gui/wxpython/gis_set.py:719
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:720
@@ -4146,14 +4146,14 @@ msgid ""
 "\n"
 "ALL MAPS included in this mapset will be PERMANENTLY DELETED!"
 msgstr ""
-"로케이션 <%(location)s>로부터 지도세트 <%(mapset)s>의 삭제를 진행할까요?\n"
+"로케이션 <%(location)s>로부터 지도 세트 <%(mapset)s>의 삭제를 진행할까요?\n"
 "\n"
-"이 지도세트에 포함된 모든 지도들이 영구히 삭제될 것입니다!"
+"이 지도 세트에 포함된 모든 지도들이 영구히 삭제될 것입니다!"
 
 #: ../gui/wxpython/gis_set.py:733
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:734
 msgid "Unable to delete mapset"
-msgstr "지도세트를 삭제할 수 없습니다"
+msgstr "지도 세트를 삭제할 수 없습니다"
 
 #: ../gui/wxpython/gis_set.py:747
 #: ../gui/wxpython/image2target/ii2t_gis_set.py:748
@@ -4233,7 +4233,7 @@ msgid ""
 "\n"
 "Do you want to try to remove .gislock (note that you need permission for this operation) and continue?"
 msgstr ""
-"GRASS가 이미 선택된 지도세트 <%(mapset)s>에서 실행 중입니다 (파일 %(lock)s를 찾았습니다).\n"
+"GRASS가 이미 선택된 지도 세트 <%(mapset)s>에서 실행 중입니다 (파일 %(lock)s를 찾았습니다).\n"
 "\n"
 "동시 실행은 허락되지 않습니다.\n"
 "\n"
@@ -5187,7 +5187,7 @@ msgstr "복사"
 #: ../gui/wxpython/image2target/ii2t_menustrings.py:169
 #: ../gui/wxpython/image2target/ii2t_menustrings.py:1170
 msgid "Copies available data files in the current mapset search path to the user's current mapset."
-msgstr "지도세트 검색 경로에서 가능한 파일을 현재 사용자 지도세트로 복사합니다."
+msgstr "지도 세트 검색 경로에서 가능한 파일을 현재 사용자 지도 세트로 복사합니다."
 
 #: ../gui/wxpython/menustrings.py:170 ../gui/wxpython/menustrings.py:961
 #: ../gui/wxpython/menustrings.py:1187 ../gui/wxpython/menustrings.py:1901
@@ -5234,7 +5234,7 @@ msgstr "삭제"
 #: ../gui/wxpython/image2target/ii2t_menustrings.py:175
 #: ../gui/wxpython/image2target/ii2t_menustrings.py:1176
 msgid "Removes data base element files from the user's current mapset using the search pattern."
-msgstr "검색패턴을 이용해서 사용자의 현재 지도세트로부터 데이터베이스 요소파일을 제거합니다."
+msgstr "검색패턴을 이용해서 사용자의 현재 지도 세트로부터 데이터베이스 요소파일을 제거합니다."
 
 #: ../gui/wxpython/menustrings.py:176 ../gui/wxpython/menustrings.py:314
 #: ../gui/wxpython/menustrings.py:608 ../gui/wxpython/menustrings.py:862
@@ -5586,7 +5586,7 @@ msgstr ""
 #: ../gui/wxpython/menustrings.py:231
 #: ../gui/wxpython/image2target/ii2t_menustrings.py:227
 msgid "Changes/reports current mapset. Optionally create new mapset or list available mapsets in given location."
-msgstr "현재 지도세트를 바꾸거나 보고합니다. 선택적으로 새 지도세트를 생성하거나 주어진 로케이션 안에 유효한 지도세트를 나열합니다."
+msgstr "현재 지도 세트를 바꾸거나 보고합니다. 선택적으로 새 지도 세트를 생성하거나 주어진 로케이션 안에 유효한 지도 세트를 나열합니다."
 
 #: ../gui/wxpython/menustrings.py:232
 #: ../gui/wxpython/image2target/ii2t_menustrings.py:228
@@ -13965,7 +13965,7 @@ msgstr ""
 
 #: ../gui/wxpython/gui_core/dialogs.py:105
 msgid "Select GRASS location and mapset"
-msgstr "GRASS 로케이션과 지도세트를 선택하세요"
+msgstr "GRASS 로케이션과 지도 세트를 선택하세요"
 
 #: ../gui/wxpython/gui_core/dialogs.py:125
 msgid "Location or mapset is not defined."
@@ -13982,7 +13982,7 @@ msgstr ""
 
 #: ../gui/wxpython/gui_core/dialogs.py:175
 msgid "Select mapset in GRASS location"
-msgstr "GRASS 로케이션 내의 지도세트를 선택하세요"
+msgstr "GRASS 로케이션 내의 지도 세트를 선택하세요"
 
 #: ../gui/wxpython/gui_core/dialogs.py:195
 msgid "Name of mapset is missing."
@@ -19274,7 +19274,7 @@ msgstr ""
 #: ../gui/wxpython/gmodeler/frame.py:406
 #, python-format
 msgid "%d intermediate maps deleted from current mapset"
-msgstr "현재 지도세트로부터 %d개의 중간 지도가 삭제됐습니다"
+msgstr "현재 지도 세트로부터 %d개의 중간 지도가 삭제됐습니다"
 
 #: ../gui/wxpython/gmodeler/frame.py:415
 msgid "No intermediate data to delete."
