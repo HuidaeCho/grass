@@ -135,10 +135,10 @@ class RenderWMSMgr(wx.EvtHandler):
 
             self._startTime = time.time()
             self.thread.Run(callable=self._render, cmd=cmd_render, env=env,
-                            ondone=self.OnRenderDone)
+                            ondone=self.OnRenderDone, userdata={'env': env})
             self.layer.forceRender = False
 
-        self.updateProgress.emit(layer=self.layer)
+        self.updateProgress.emit(env=env, layer=self.layer)
 
     def _render(self, cmd, env):
         try:
@@ -156,7 +156,7 @@ class RenderWMSMgr(wx.EvtHandler):
             return
         self.downloading = False
         if not self.updateMap:
-            self.updateProgress.emit(layer=self.layer)
+            self.updateProgress.emit(env=event.userdata['env'], layer=self.layer)
             self.renderedRegion = None
             self.fetched_data_cmd = None
             return
@@ -170,14 +170,21 @@ class RenderWMSMgr(wx.EvtHandler):
         self.mapMerger.AddRasterBands(self.tempMap, {1: 1, 2: 2, 3: 3})
         del self.mapMerger
 
+        add_alpha_channel = True
+        mask_fill_value = 0
+        if self.fetching_cmd[1]['format'] == 'jpeg':
+            mask_fill_value = 255 # white color, g.pnmcomp doesn't apply mask (alpha channel)
+            add_alpha_channel = False
+
         self.maskMerger = GDALRasterMerger(
             targetFile=self.layer.maskfile,
             region=self.renderedRegion,
             bandsNum=1,
             gdalDriver='PNM',
-            fillValue=0)
-        #{4 : 1} alpha channel (4) to first and only channel (1) in mask
-        self.maskMerger.AddRasterBands(self.tempMap, {4: 1})
+            fillValue=mask_fill_value)
+        if add_alpha_channel:
+            #{4 : 1} alpha channel (4) to first and only channel (1) in mask
+            self.maskMerger.AddRasterBands(self.tempMap, {4: 1})
         del self.maskMerger
 
         self.fetched_data_cmd = self.fetching_cmd
@@ -185,7 +192,7 @@ class RenderWMSMgr(wx.EvtHandler):
         Debug.msg(1, "RenderWMSMgr.OnRenderDone(%s): ret=%d time=%f" %
                   (self.layer, event.ret, time.time() - self._startTime))
 
-        self.dataFetched.emit(layer=self.layer)
+        self.dataFetched.emit(env=event.userdata['env'], layer=self.layer)
 
     def _getRegionDict(self, env):
         """Parse string from GRASS_REGION env variable into dict.

@@ -34,7 +34,7 @@ from .utils import KeyValue, parse_key_val, basename, encode, decode
 from grass.exceptions import ScriptError, CalledModuleError
 
 # PY2/PY3 compat
-if sys.version_info.major > 2:
+if sys.version_info.major >= 3:
     unicode = str
 
 # subprocess wrapper that uses shell on Windows
@@ -224,8 +224,9 @@ def shutil_which(cmd, mode=os.F_OK | os.X_OK, path=None):
                     return name
     return None
 
-if sys.version_info.major > 2:
-    shutil_which = shutil.which
+if sys.version_info.major >= 3:
+    # Use shutil.which in Python 3, not the custom implementation.
+    shutil_which = shutil.which  # noqa: F811
 
 # Added because of scripts calling scripts on MS Windows.
 # Module name (here cmd) differs from the file name (does not have extension).
@@ -1277,7 +1278,7 @@ def use_temp_region():
     handler to delete the temporary region upon termination.
     """
     name = "tmp.%s.%d" % (os.path.basename(sys.argv[0]), os.getpid())
-    run_command("g.region", save=name, overwrite=True)
+    run_command("g.region", flags="u", save=name, overwrite=True)
     os.environ['WIND_OVERRIDE'] = name
     atexit.register(del_temp_region)
 

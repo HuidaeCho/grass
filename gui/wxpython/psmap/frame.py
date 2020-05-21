@@ -42,7 +42,7 @@ from core.utils import PilImageToWxImage
 from gui_core.forms import GUI
 from gui_core.dialogs import HyperlinkDialog
 from gui_core.ghelp import ShowAboutDialog
-from gui_core.wrap import ClientDC, PseudoDC, Rect, StockCursor, EmptyBitmap, NewId
+from gui_core.wrap import ClientDC, PseudoDC, Rect, StockCursor, EmptyBitmap
 from psmap.menudata import PsMapMenuData
 from gui_core.toolbars import ToolSwitcher
 
@@ -1009,7 +1009,7 @@ class PsMapFrame(wx.Frame):
 
     def DialogDataChanged(self, id):
         ids = id
-        if isinstance(id, int) or isinstance(id, wx.WindowIDRef):
+        if isinstance(id, int):
             ids = [id]
         for id in ids:
             itype = self.instruction[id].type
@@ -2528,6 +2528,8 @@ class PsMapBufferedWindow(wx.Window):
         # Make new off screen bitmap: this bitmap will always have the
         # current drawing in it, so it can be used to save the image
         # to a file, or whatever.
+        width = max(width, 20)
+        height = max(height, 20)
         self._buffer = EmptyBitmap(width, height)
         # re-render image on idle
         self.resize = True
