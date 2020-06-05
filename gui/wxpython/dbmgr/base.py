@@ -61,8 +61,8 @@ from dbmgr.vinfo import VectorDBInfo, GetUnicodeValue, CreateDbInfoDesc, GetDbEn
 from core.debug import Debug
 from dbmgr.dialogs import ModifyTableRecord, AddColumnDialog
 from core.settings import UserSettings
-from gui_core.wrap import SpinCtrl, Button, TextCtrl, ListCtrl, CheckBox, \
-    StaticText, StaticBox, Menu, NewId
+from gui_core.wrap import Button, CheckBox, ComboBox, ListCtrl, Menu, \
+    NewId, SpinCtrl, StaticBox, StaticText, TextCtrl
 from core.utils import cmp
 
 if sys.version_info.major >= 3:
@@ -1208,9 +1208,9 @@ class DbMgrBrowsePage(DbMgrNotebookBase):
             parent=simpleSqlPanel,
             id=wx.ID_ANY,
             name='wherePanel')
-        sqlWhereColumn = wx.ComboBox(
+        sqlWhereColumn = ComboBox(
             parent=whereSimpleSqlPanel, id=wx.ID_ANY, size=(150, -1),
-            style=wx.CB_SIMPLE | wx.CB_READONLY,
+            style=wx.CB_READONLY,
             choices=self.dbMgrData['mapDBInfo'].GetColumns(
                 self.dbMgrData['mapDBInfo'].layers[layer]['table']))
         sqlWhereColumn.SetSelection(0)
@@ -1262,16 +1262,16 @@ class DbMgrBrowsePage(DbMgrNotebookBase):
 
         sqlSimpleWhereSizer.Add(
             sqlWhereColumn,
-            flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL | wx.LEFT,
+            flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT,
             border=3)
         sqlSimpleWhereSizer.Add(
             sqlWhereCond,
-            flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL | wx.LEFT,
+            flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT,
             border=3)
         sqlSimpleWhereSizer.Add(
             sqlWhereValue,
             proportion=1,
-            flag=wx.EXPAND | wx.ALIGN_CENTER_VERTICAL | wx.LEFT,
+            flag=wx.ALIGN_CENTER_VERTICAL | wx.LEFT,
             border=3)
         whereSimpleSqlPanel.SetSizer(sqlSimpleWhereSizer)
         simpleSqlSizer.Add(sqlLabel, border=5, pos=(0, 0),
@@ -2376,7 +2376,7 @@ class DbMgrTablesPage(DbMgrNotebookBase):
         btnAddCol.Bind(wx.EVT_BUTTON, self.OnTableItemAdd)
         btnAddCol.Enable(False)
         self.layerPage[layer]['addColButton'] = btnAddCol.GetId()
-        addSizer.Add(btnAddCol, flag=wx.ALL | wx.ALIGN_RIGHT | wx.EXPAND,
+        addSizer.Add(btnAddCol, flag=wx.ALL | wx.EXPAND,
                      border=3)
 
         # manage columns (rename)
@@ -2384,9 +2384,9 @@ class DbMgrTablesPage(DbMgrNotebookBase):
                               label=" %s " % _("Rename column"))
         renameSizer = wx.StaticBoxSizer(renameBox, wx.HORIZONTAL)
 
-        columnFrom = wx.ComboBox(
+        columnFrom = ComboBox(
             parent=panel, id=wx.ID_ANY, size=(150, -1),
-            style=wx.CB_SIMPLE | wx.CB_READONLY,
+            style=wx.CB_READONLY,
             choices=self.dbMgrData['mapDBInfo'].GetColumns(table))
         columnFrom.SetSelection(0)
         self.layerPage[layer]['renameCol'] = columnFrom.GetId()
@@ -2426,7 +2426,7 @@ class DbMgrTablesPage(DbMgrNotebookBase):
         self.layerPage[layer]['renameColButton'] = btnRenameCol.GetId()
         renameSizer.Add(
             btnRenameCol,
-            flag=wx.ALL | wx.ALIGN_RIGHT | wx.EXPAND,
+            flag=wx.ALL | wx.EXPAND,
             border=3)
 
         tableSizer.Add(tlist,
@@ -3221,7 +3221,7 @@ class LayerBook(wx.Notebook):
 
         btnSizer.Add(btnLayer,
                      proportion=0,
-                     flag=wx.ALL | wx.ALIGN_RIGHT,
+                     flag=wx.ALL,
                      border=5)
 
         layerSizer.Add(btnSizer,
@@ -3246,7 +3246,7 @@ class LayerBook(wx.Notebook):
 
         tableSizer.Add(btnTable,
                        proportion=0,
-                       flag=wx.ALL | wx.ALIGN_BOTTOM | wx.ALIGN_RIGHT,
+                       flag=wx.ALL | wx.ALIGN_RIGHT,
                        border=5)
 
         pageSizer.Add(layerSizer,
@@ -3258,11 +3258,7 @@ class LayerBook(wx.Notebook):
                       proportion=2,
                       flag=wx.TOP | wx.BOTTOM | wx.RIGHT | wx.EXPAND,
                       border=3)
-
-        # SetVirtualSizeHints is deprecated and is
-        # exactly the same as FitInside() in wxWidgets 2.9 and later
-        getattr(layerSizer, 'FitInside',
-                layerSizer.SetVirtualSizeHints)(self.addPanel)
+        layerSizer.FitInside(self.addPanel)
 
         self.addPanel.SetAutoLayout(True)
         self.addPanel.SetSizer(pageSizer)
@@ -3276,9 +3272,9 @@ class LayerBook(wx.Notebook):
         label = StaticText(parent=self.deletePanel, id=wx.ID_ANY,
                            label='%s:' % _("Layer to remove"))
 
-        self.deleteLayer = wx.ComboBox(
+        self.deleteLayer = ComboBox(
             parent=self.deletePanel, id=wx.ID_ANY, size=(100, -1),
-            style=wx.CB_SIMPLE | wx.CB_READONLY,
+            style=wx.CB_READONLY,
             choices=list(map(str, self.mapDBInfo.layers.keys())))
         self.deleteLayer.SetSelection(0)
         self.deleteLayer.Bind(wx.EVT_COMBOBOX, self.OnChangeLayer)
@@ -3351,9 +3347,9 @@ class LayerBook(wx.Notebook):
         self.modifyLayerWidgets = {'layer':
                                    (StaticText(parent=self.modifyPanel, id=wx.ID_ANY,
                                                label='%s:' % _("Layer")),
-                                    wx.ComboBox(parent=self.modifyPanel, id=wx.ID_ANY,
+                                    ComboBox(parent=self.modifyPanel, id=wx.ID_ANY,
                                                 size=(100, -1),
-                                                style=wx.CB_SIMPLE | wx.CB_READONLY,
+                                                style=wx.CB_READONLY,
                                                 choices=list(map(str,
                                                             self.mapDBInfo.layers.keys())))),
                                    'driver':

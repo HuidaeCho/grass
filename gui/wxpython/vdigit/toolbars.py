@@ -49,6 +49,7 @@ class VDigitToolbar(BaseToolbar):
         self.editingStarted = Signal("VDigitToolbar.editingStarted")
         self.editingStopped = Signal("VDigitToolbar.editingStopped")
         self.editingBgMap = Signal("VDigitToolbar.editingBgMap")
+        self.quitDigitizer = Signal("VDigitToolbar.quitDigitizer")
         layerTree = self._giface.GetLayerTree()
         if layerTree:
             self.editingStarted.connect(layerTree.StartEditing)
@@ -423,12 +424,7 @@ class VDigitToolbar(BaseToolbar):
         self.parent.GetMapToolbar().SelectDefault()
         self.MapWindow.polycoords = []
 
-        # TODO: replace this by binding wx event in parent (or use signals...)
-        if not self.parent.IsStandalone():
-            # disable the toolbar
-            self.parent.RemoveToolbar("vdigit")
-        else:
-            self.parent.Close()
+        self.quitDigitizer.emit()
 
     def OnMoveVertex(self, event):
         """Move line vertex"""
@@ -495,13 +491,15 @@ class VDigitToolbar(BaseToolbar):
 
     def OnUndo(self, event):
         """Undo previous changes"""
-        self.digit.Undo()
+        if self.digit:
+            self.digit.Undo()
 
         event.Skip()
 
     def OnRedo(self, event):
         """Undo previous changes"""
-        self.digit.Undo(level=1)
+        if self.digit:
+            self.digit.Undo(level=1)
 
         event.Skip()
 
@@ -1122,5 +1120,6 @@ class VDigitToolbar(BaseToolbar):
 
     def OnShow(self, event):
         """Show frame event"""
-        # list of available vector maps
-        self.UpdateListOfLayers(updateTool=True)
+        if event.IsShown():
+            # list of available vector maps
+            self.UpdateListOfLayers(updateTool=True)
