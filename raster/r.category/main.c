@@ -184,12 +184,15 @@ int main(int argc, char *argv[])
 		if (!G_getl2(buf, sizeof(buf), fp))
 		    break;
 
+		G_debug(1, "rule input (separator: <%s>): <%s>", fs, buf);
 		tokens = G_tokenize(buf, fs);
 		ntokens = G_number_of_tokens(tokens);
+		G_debug(1, "tokens found: <%d>", ntokens);
 
 		if (ntokens == 3) {
 		    d1 = strtod(tokens[0], &e1);
 		    d2 = strtod(tokens[1], &e2);
+		    G_debug(1, "d1: <%f>, d2: <%f>, tokens[0]: <%s>, tokens[1]: <%s>", d1, d2, tokens[0], tokens[1]);
 		    if (*e1 == 0 && *e2 == 0)
 			Rast_set_d_cat(&d1, &d2, tokens[2], &cats);
 		    else
@@ -197,6 +200,7 @@ int main(int argc, char *argv[])
 		}
 		else if (ntokens == 2) {
 		    d1 = strtod(tokens[0], &e1);
+		    G_debug(1, "d1: <%f>, tokens[0]: <%s>, tokens[1]: <%s>", d1, tokens[0], tokens[1]);
 		    if (*e1 == 0)
 			Rast_set_d_cat(&d1, &d1, tokens[1], &cats);
 		    else
@@ -209,7 +213,7 @@ int main(int argc, char *argv[])
 
 		if (parse_error)
 		    G_fatal_error(_("Incorrect format of input rules. "
-				    "Check separators. Invalid line is:\n%s"), buf);
+				    "Is the first column numeric? Or check separators. Invalid line is:\n%s"), buf);
 	    }
 	    G_free_tokens(tokens);
 	    Rast_write_cats(name, &cats);

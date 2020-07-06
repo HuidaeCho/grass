@@ -16,6 +16,7 @@ This program is free software under the GNU General Public License
 @author Stepan Turek <stepan.turek seznam.cz>
 """
 
+import re
 import os
 import sys
 import six
@@ -709,7 +710,9 @@ class WSPanel(wx.Panel):
 
         if 'srs' not in self.drv_props['ignored_params']:
             i_srs = self.params['srs'].GetSelection()
-            epsg_num = int(self.projs_list[i_srs].split(':')[-1])
+            srs = self.projs_list[i_srs].split(':')[-1]
+            epsg_num = int(''.join(re.findall(r'\d+', srs)))
+
             lcmd.append("srs=%s" % epsg_num)
 
         for k in ['maxcols', 'maxrows', 'urlparams']:
@@ -774,11 +777,8 @@ class WSPanel(wx.Panel):
                 proj_code = Srs(proj.strip()).getcode()
                 proj_spl = proj_code.split(':')
                 if proj_spl[0].strip().lower() in self.drv_info.GetSrs():
-                    try:
-                        int(proj_spl[1])
-                        self.projs_list.append(proj_code)
-                    except ValueError as IndexError:
-                        continue
+                    # accept ogc:crs code
+                    self.projs_list.append(proj_code)
 
             cur_sel = self.params['srs'].GetStringSelection()
 
@@ -802,7 +802,7 @@ class WSPanel(wx.Panel):
             self.formats_list = []
             cur_sel = None
 
-            if self.params['format'] is not None:
+            if self.params['format']:
                 cur_sel = self.params['format'].GetStringSelection()
 
             if len(curr_sel_ls) > 0:
@@ -812,7 +812,8 @@ class WSPanel(wx.Panel):
                 self._updateFormatRadioBox(self.formats_list)
 
                 if cur_sel:
-                    self.params['format'].SetStringSelection(cur_sel)
+                    if self.params['format']:
+                        self.params['format'].SetStringSelection(cur_sel)
                 else:
                     self._setDefaultFormatVal()
 
@@ -830,7 +831,7 @@ class WSPanel(wx.Panel):
     def _updateFormatRadioBox(self, formats_list):
         """Helper function
         """
-        if self.params['format'] is not None:
+        if self.params['format']:
             self.req_page_sizer.Detach(self.params['format'])
             self.params['format'].Destroy()
         if len(self.formats_list) > 0:
@@ -1081,7 +1082,7 @@ class LayersList(TreeCtrl):
         :param l_st_list: [{style : 'style_name', layer : 'layer_name'}, ...]
         :return: items from l_st_list which were not found
         """
-        def checknext(item, l_st_list, items_to_sel):
+        def checknext(root_item, l_st_list, items_to_sel):
             def compare(item, l_name, st_name):
                 it_l_name = self.GetItemData(item)['layer'].GetLayerData('name')
                 it_st = self.GetItemData(item)['style']
@@ -1094,19 +1095,20 @@ class LayersList(TreeCtrl):
 
                 return False
 
-            for i, l_st in enumerate(l_st_list):
-                l_name = l_st['layer']
-                st_name = l_st['style']
+            (child, cookie) = self.GetFirstChild(root_item)
+            while child.IsOk():
+                for i, l_st in enumerate(l_st_list):
+                    l_name = l_st['layer']
+                    st_name = l_st['style']
 
-                if compare(item, l_name, st_name):
-                    items_to_sel[i] = [item, l_st]
-                    break
+                    if compare(child, l_name, st_name):
+                        items_to_sel[i] = [child, l_st]
+                        break
 
-            if len(items_to_sel) == len(l_st_list):
-                item = self.GetNextVisible(item)
-                if not item.IsOk():
-                    return
-                checknext(item, l_st_list, items_to_sel)
+                if len(items_to_sel) == len(l_st_list):
+                    if self.ItemHasChildren(child):
+                        checknext(child, l_st_list, items_to_sel)
+                    child = self.GetNextSibling(child)
 
         self.UnselectAll()
 
@@ -1115,6 +1117,7 @@ class LayersList(TreeCtrl):
 
         items_to_sel = [None] * len(l_st_list)
         checknext(root_item, l_st_list, items_to_sel)
+        self.CollapseAll()
 
         # items are selected according to position in l_st_list
         # to be added to Layers order list in right order
@@ -1128,6 +1131,8 @@ class LayersList(TreeCtrl):
                 keep = True
 
             self.SelectItem(item, select=keep)
+            self.SetFocusedItem(item)
+            self.Expand(item)
             l_st_list.remove(l_st)
 
         return l_st_list

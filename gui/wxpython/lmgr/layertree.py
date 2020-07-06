@@ -176,7 +176,8 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
                 style=ctstyle,
                 **kwargs)
         self.SetName("LayerTree")
-        self.SetBackgroundColour("white")
+        self.SetBackgroundColour(
+            wx.SystemSettings().GetColour(wx.SYS_COLOUR_WINDOW))
 
         # SetAutoLayout() causes that no vertical scrollbar is displayed
         # when some layers are not visible in layer tree
@@ -2004,6 +2005,9 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
             mapName, found = GetLayerNameFromCmd(dcmd)
             mapLayer = self.GetLayerInfo(layer, key='maplayer')
             self.SetItemText(layer, mapName)
+            # calculates all the positions of the visible items
+            # fix length from item to next non-toplevel window position
+            self.CalculatePositions()
 
             if not mapText or not found:
                 propwin.Hide()
