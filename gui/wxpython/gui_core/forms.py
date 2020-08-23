@@ -611,7 +611,6 @@ class TaskFrame(wx.Frame):
                 parent=self.panel, id=wx.ID_OK, label=_("&Run"))
             self.btn_run.SetToolTip(_("Run the command (Ctrl+R)"))
             self.btn_run.SetDefault()
-            self.btn_run.SetForegroundColour(wx.Colour(35, 142, 35))
 
             btnsizer.Add(self.btn_run, proportion=0,
                          flag=wx.ALL | wx.ALIGN_CENTER,
@@ -1460,7 +1459,8 @@ class CmdPanel(wx.Panel):
                                     for layer in layers:
                                         if layer.type != p.get('prompt'):
                                             continue
-                                        mapList.append(str(layer))
+                                        if str(layer):
+                                            mapList.append(str(layer))
                         selection = gselect.Select(
                             parent=which_panel, id=wx.ID_ANY,
                             size=globalvar.DIALOG_GSELECT_SIZE, type=elem,

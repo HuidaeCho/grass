@@ -1,3 +1,5 @@
+[![Docker Pulls](https://img.shields.io/docker/pulls/mundialis/grass-py3-pdal.svg)](https://grass.osgeo.org/download/software/docker-images/)
+
 # GRASS GIS docker matrix
 
 | Base image   | Docker tag      | GRASS GIS  | PROJ  | GDAL  | PDAL  | Image size |
@@ -25,3 +27,5 @@ To install a docker image, run (replace `<tag>` with the desired Docker tag from
 ```
 docker pull mundialis/grass-py3-pdal:<tag>
 ```
+
+See also: https://grass.osgeo.org/download/software/docker-images/
