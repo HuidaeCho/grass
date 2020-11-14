@@ -7,11 +7,20 @@ from collections import OrderedDict
 
 import grass.script as gs
 
+# band reference should be required to have the format
+# <shortcut>_<band>
+# instead, the sensor name should be stored somewhere else,
+# and band names should be STAC common names, see
+# https://stacspec.org/
+# https://github.com/radiantearth/stac-spec/blob/master/extensions/eo/README.md#band-object
+# custom names must be possible
+
 class BandReferenceReaderError(Exception):
     pass
 
 class BandReferenceReader:
     """Band references reader"""
+
     def __init__(self):
         self._json_files = glob.glob(
             os.path.join(os.environ['GISBASE'], 'etc', 'g.bands', '*.json')
@@ -35,7 +44,7 @@ class BandReferenceReader:
                 raise BandReferenceReaderError(
                     "Unable to parse '{}': {}".format(
                         json_file, e
-                ))
+                    ))
 
             # check if configuration is valid
             self._check_config(config)
@@ -55,7 +64,7 @@ class BandReferenceReader:
                 if item not in items.keys():
                     raise BandReferenceReaderError(
                         "Invalid band definition: <{}> is missing".format(item
-                ))
+                                                                          ))
             if len(items['bands']) < 1:
                 raise BandReferenceReaderError(
                     "Invalid band definition: no bands defined"
@@ -164,9 +173,11 @@ class BandReferenceReader:
         try:
             shortcut, band = band_reference.split('_')
         except ValueError:
-            raise BandReferenceReaderError("Invalid band identifier <{}>".format(
-                band_reference
-            ))
+            # raise BandReferenceReaderError("Invalid band identifier <{}>".format(
+            #    band_reference
+            # ))
+            shortcut = "unknown"
+            band = band_reference
 
         for filename, config in self.config.items():
             for root in config.keys():

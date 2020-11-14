@@ -1797,7 +1797,7 @@ def csh_startup(location, grass_env_file):
     f.write("alias _location g.gisenv get=LOCATION_NAME\n")
     f.write("alias _mapset g.gisenv get=MAPSET\n")
     f.write("alias precmd \'echo \"Mapset <`_mapset`> in Location <`_location`>\"\'\n")
-    f.write("set prompt=\"GRASS GIS %s > \"\n" % GRASS_VERSION)
+    f.write("set prompt=\"GRASS > \"\n")
 
     # csh shell rc file left for backward compatibility
     path = os.path.join(userhome, ".grass.cshrc")
@@ -1828,6 +1828,7 @@ def csh_startup(location, grass_env_file):
 
 
 def sh_like_startup(location, location_name, grass_env_file, sh):
+    """Start Bash or Z shell (but not sh (Bourne Shell))"""
     if sh == 'bash':
         sh_history = ".bash_history"
         shrc = ".bashrc"
@@ -1841,7 +1842,9 @@ def sh_like_startup(location, location_name, grass_env_file, sh):
             'Only bash-like and zsh shells are supported by sh_like_startup()')
 
     # save command history in mapset dir and remember more
-    os.environ['HISTFILE'] = os.path.join(location, sh_history)
+    # bash histroy file handled in specific_addition
+    if not sh == "bash":
+        os.environ['HISTFILE'] = os.path.join(location, sh_history)
     if not os.getenv('HISTSIZE') and not os.getenv('HISTFILESIZE'):
         os.environ['HISTSIZE'] = "3000"
 
@@ -1874,31 +1877,50 @@ def sh_like_startup(location, location_name, grass_env_file, sh):
 
     if sh == 'zsh':
         f.write("setopt PROMPT_SUBST\n")
-        f.write("PS1='{name} {version} : %1~ > '\n".format(
-            name=grass_name, version=GRASS_VERSION))
+        f.write("PS1='{name} : %1~ > '\n".format(name=grass_name))
     else:
-        f.write("PS1='{name} {version} ({location}):\\w > '\n".format(
-            name=grass_name, version=GRASS_VERSION, location=location_name))
+        f.write("PS1='{name} {db_place}:\\W > '\n".format(
+            name=grass_name, version=GRASS_VERSION, db_place="$_GRASS_DB_PLACE"))
 
     # TODO: have a function and/or module to test this
     mask2d_test = 'test -f "$MAPSET_PATH/cell/MASK"'
     mask3d_test = 'test -d "$MAPSET_PATH/grid3/RASTER3D_MASK"'
 
-    zsh_addition = ""
+    specific_addition = ""
     if sh == 'zsh':
-        zsh_addition = """
+        specific_addition = """
     local z_lo=`g.gisenv get=LOCATION_NAME`
     local z_ms=`g.gisenv get=MAPSET`
     ZLOC="Mapset <$z_ms> in <$z_lo>"
-    """
+    if [ "$_grass_old_mapset" != "$MAPSET_PATH" ] ; then
+        fc -A -I
+        HISTFILE="$MAPSET_PATH/{sh_history}"
+        fc -R
+        _grass_old_mapset="$MAPSET_PATH"
+    fi
+    """.format(sh_history=sh_history)
+    elif sh == "bash":
+        # Append existing history to file ("flush").
+        # Clear the (in-memory) history.
+        # Change the file.
+        # Read history from that file.
+        specific_addition = """
+    if [ "$_grass_old_mapset" != "$MAPSET_PATH" ] ; then
+        history -a
+        history -c
+        HISTFILE="$MAPSET_PATH/{sh_history}"
+        history -r
+        _grass_old_mapset="$MAPSET_PATH"
+    fi
+    """.format(sh_history=sh_history)
 
     # double curly brackets means single one for format function
     # setting LOCATION for backwards compatibility
     f.write(
         """grass_prompt() {{
     MAPSET_PATH="`g.gisenv get=GISDBASE,LOCATION_NAME,MAPSET separator='/'`"
-    LOCATION="$MAPSET_PATH"
-    {zsh_addition}
+    _GRASS_DB_PLACE="`g.gisenv get=LOCATION_NAME,MAPSET separator='/'`"
+    {specific_addition}
     if {mask2d_test} && {mask3d_test} ; then
         echo "[{both_masks}]"
     elif {mask2d_test} ; then
@@ -1912,7 +1934,7 @@ PROMPT_COMMAND=grass_prompt\n""".format(
             mask2d=_("Raster MASK present"),
             mask3d=_("3D raster MASK present"),
             mask2d_test=mask2d_test, mask3d_test=mask3d_test,
-            zsh_addition=zsh_addition
+            specific_addition=specific_addition
             ))
 
     if sh == 'zsh':
@@ -1947,12 +1969,13 @@ PROMPT_COMMAND=grass_prompt\n""".format(
 
 
 def default_startup(location, location_name):
+    """Start shell making no assumptions about what is supported in PS1"""
     if WINDOWS:
-        os.environ['PS1'] = "GRASS %s> " % (GRASS_VERSION)
+        os.environ['PS1'] = "GRASS > "
         # "$ETC/run" doesn't work at all???
         process = subprocess.Popen([os.getenv('SHELL')])
     else:
-        os.environ['PS1'] = "GRASS %s (%s):\\w > " % (GRASS_VERSION, location_name)
+        os.environ['PS1'] = "GRASS > "
         process = Popen([gpath("etc", "run"), os.getenv('SHELL')])
 
     return process

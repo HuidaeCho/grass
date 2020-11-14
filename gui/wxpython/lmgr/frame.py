@@ -364,6 +364,7 @@ class GMFrame(wx.Frame):
             '^cd$|^cd .*')
         self.goutput = GConsoleWindow(
             parent=self.notebook,
+            giface=self._giface,
             gconsole=self._gconsole,
             menuModel=self._moduleTreeBuilder.GetModel(),
             gcstyle=GC_PROMPT)
@@ -412,6 +413,7 @@ class GMFrame(wx.Frame):
             FN.EVT_FLATNOTEBOOK_PAGE_CLOSING,
             self.OnCBPageClosing)
 
+        wx.CallAfter(self.datacatalog.LoadItems)
         return self.notebook
 
     def AddNvizTools(self, firstTime):
@@ -589,6 +591,13 @@ class GMFrame(wx.Frame):
         win.CentreOnScreen()
         win.Show()
 
+    def OnDataCatalog(self, event=None, cmd=None):
+        """Launch Data Catalog"""
+        from datacatalog.frame import DataCatalogFrame
+        win = DataCatalogFrame(parent=self, giface=self._giface)
+        win.CentreOnScreen()
+        win.Show()
+
     def OnDone(self, event):
         """Command execution finished"""
         if hasattr(self, "model"):
@@ -648,8 +657,6 @@ class GMFrame(wx.Frame):
         page = event.GetSelection()
         if page == self.notebook.GetPageIndexByName('output'):
             wx.CallAfter(self.goutput.ResetFocus)
-        elif page == self.notebook.GetPageIndexByName('catalog'):
-            wx.CallAfter(self.datacatalog.LoadItems)
         self.SetStatusText('', 0)
 
         event.Skip()

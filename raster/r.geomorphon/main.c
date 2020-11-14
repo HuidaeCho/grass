@@ -11,7 +11,7 @@
 *		This technology is currently capable of "experimental" stage.
 *
 * COPYRIGHT:	(C) 2002,2012 by the GRASS Development Team
-*		(C) Scientific idea of geomotrphon copyrighted to authors.
+*		(C) Scientific idea of geomorphon copyrighted to authors.
 *
 *		This program is free software under the GNU General Public
 *		License (>=v2). Read the file COPYING that comes with GRASS
@@ -21,11 +21,32 @@
 
 #define MAIN
 #include "local_proto.h"
+
+#define UNKNOWN -1
+
 typedef enum
 { i_dem, o_forms, o_ternary, o_positive, o_negative, o_intensity,
 	o_exposition,
     o_range, o_variance, o_elongation, o_azimuth, o_extend, o_width, io_size
 } outputs;
+
+typedef struct
+{				/* struct is used both for interface and output */
+    char *name;
+    int required;
+    char *description;
+    char *gui;
+    RASTER_MAP_TYPE out_data_type;
+    int fd;
+    void *buffer;
+} IO;
+
+typedef struct
+{
+    char name[100];
+    int fd;
+    CELL *forms_buffer;
+} MULTI;
 
 int main(int argc, char **argv)
 {
@@ -60,21 +81,6 @@ int main(int argc, char **argv)
 	 "Geometry", FCELL_TYPE, -1, NULL}
     };				/* adding more maps change IOSIZE macro */
 
-    CATCOLORS ccolors[CNT] = {	/* colors and cats for forms */
-	{ZERO, 0, 0, 0, "forms"},
-	{FL, 220, 220, 220, "flat"},
-	{PK, 56, 0, 0, "summit"},
-	{RI, 200, 0, 0, "ridge"},
-	{SH, 255, 80, 20, "shoulder"},
-	{CV, 250, 210, 60, "spur"},
-	{SL, 255, 255, 60, "slope"},
-	{CN, 180, 230, 20, "hollow"},
-	{FS, 60, 250, 150, "footslope"},
-	{VL, 0, 0, 255, "valley"},
-	{PT, 0, 0, 56, "depression"},
-	{__, 255, 0, 255, "ERROR"}
-    };
-
     struct GModule *module;
     struct Option
 	*opt_input,
@@ -91,7 +97,12 @@ int main(int argc, char **argv)
     int i;
     int meters = 0, multires = 0, extended = 0;	/* flags */
     int row, cur_row, col;
+    int nrows;
     int pattern_size;
+    int search_cells, step_cells, start_cells;
+    int num_of_steps;
+    double start_distance, step_distance;	/* multiresolution mode */
+    double skip_distance;
     double max_resolution;
     char prefix[20];
 
@@ -138,7 +149,7 @@ int main(int argc, char **argv)
 	par_flat_threshold->type = TYPE_DOUBLE;
 	par_flat_threshold->answer = "1";
 	par_flat_threshold->required = YES;
-	par_flat_threshold->description = _("Flatenss threshold (degrees)");
+	par_flat_threshold->description = _("Flatness threshold (degrees)");
 
 	par_flat_distance = G_define_option();
 	par_flat_distance->key = "dist";
@@ -146,7 +157,7 @@ int main(int argc, char **argv)
 	par_flat_distance->answer = "0";
 	par_flat_distance->required = YES;
 	par_flat_distance->description =
-	    _("Flatenss distance, zero for none");
+	    _("Flatness distance, zero for none");
 
 	par_multi_prefix = G_define_option();
 	par_multi_prefix->key = "prefix";
@@ -168,7 +179,7 @@ int main(int argc, char **argv)
 	par_multi_start->type = TYPE_DOUBLE;
 	par_multi_start->answer = "0";
 	par_multi_start->description =
-	    _("Distance where serch will start in multiple mode (zero to omit)");
+	    _("Distance where search will start in multiple mode (zero to omit)");
 	par_multi_start->guisection = _("Multires");
 
 	flag_units = G_define_flag();
@@ -242,7 +253,7 @@ int main(int argc, char **argv)
 	/* flatness parameters */
 	flat_threshold = atof(par_flat_threshold->answer);
 	if (flat_threshold <= 0.)
-	    G_fatal_error(_("Flatenss threshold must be grater than 0"));
+	    G_fatal_error(_("Flatness threshold must be grater than 0"));
 	flat_threshold = DEGREE2RAD(flat_threshold);
 
 	flat_distance = atof(par_flat_distance->answer);
@@ -251,7 +262,7 @@ int main(int argc, char **argv)
 	flat_threshold_height = tan(flat_threshold) * flat_distance;
 	if ((flat_distance > 0 && flat_distance <= skip_distance) ||
 	    flat_distance >= search_distance) {
-	    G_warning(_("Flatenss distance should be between skip and search radius. Otherwise ignored"));
+	    G_warning(_("Flatness distance should be between skip and search radius. Otherwise ignored"));
 	    flat_distance = 0;
 	}
 	if (multires) {
@@ -371,7 +382,7 @@ int main(int argc, char **argv)
 		    continue;
 		}		/* end null value */
 		{
-		    int cur_form, small_form;
+		    FORMS cur_form;
 
 		    search_distance = search_dist;
 		    skip_distance = skip_dist;
@@ -386,8 +397,9 @@ int main(int argc, char **argv)
 		    /* correction of forms */
 		    if (extended && search_distance > 10 * max_resolution) {
 			/* 1) remove extensive innatural forms: ridges, peaks, shoulders and footslopes */
-			if ((cur_form == 4 || cur_form == 8 || cur_form == 2
-			     || cur_form == 3)) {
+			if ((cur_form == SH || cur_form == FS || cur_form == PK
+			     || cur_form == RI)) {
+			    FORMS small_form;
 			    search_distance =
 				(search_dist / 2. <
 				 4 * max_resolution) ? 4 *
@@ -400,9 +412,9 @@ int main(int argc, char **argv)
 			    small_form =
 				determine_form(pattern->num_negatives,
 					       pattern->num_positives);
-			    if (cur_form == 4 || cur_form == 8)
-				cur_form = (small_form == 1) ? 1 : cur_form;
-			    if (cur_form == 2 || cur_form == 3)
+			    if (cur_form == SH || cur_form == FS)
+				cur_form = (small_form == FL) ? FL : cur_form;
+			    if (cur_form == PK || cur_form == RI)
 				cur_form = small_form;
 			}
 			/* 3) Depressions */
@@ -479,7 +491,7 @@ int main(int argc, char **argv)
 	    }
 
 	if (opt_output[o_forms]->answer)
-	    write_form_cat_colors(opt_output[o_forms]->answer, ccolors);
+	    write_form_cat_colors(opt_output[o_forms]->answer);
 	if (opt_output[o_intensity]->answer)
 	    write_contrast_colors(opt_output[o_intensity]->answer);
 	if (opt_output[o_exposition]->answer)
@@ -489,12 +501,12 @@ int main(int argc, char **argv)
 
 	G_done_msg(" ");
 	exit(EXIT_SUCCESS);
-    }				/* end of multiresolution */
+    }				/* end of NOT multiresolution */
 
     if (multires) {
 	PATTERN *multi_patterns;
 	MULTI multiple_output[5];	/* ten form maps + all forms */
-	char *postfixes[] = { "scale_300", "scale_100", "scale_50", "scale_20" "scale_10" };	/* in pixels */
+	char *postfixes[] = { "scale_300", "scale_100", "scale_50", "scale_20", "scale_10" };	/* in pixels */
 	num_of_steps = 5;
 	multi_patterns = G_malloc(num_of_steps * sizeof(PATTERN));
 	/* prepare outputs */
@@ -549,6 +561,6 @@ int main(int argc, char **argv)
 	}
 	G_message("Multiresolution Done!");
 	exit(EXIT_SUCCESS);
-    }
+    }				/* end of multiresolution */
 
 }

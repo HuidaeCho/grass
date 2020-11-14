@@ -240,6 +240,24 @@ class PsMapFrame(wx.Frame):
         self.SetSizer(mainSizer)
         mainSizer.Fit(self)
 
+    def _checkMapFrameExists(self, type_id):
+        """Check if map frame exists
+
+        :param int type_id: type id (raster, vector,...)
+
+        :return bool: False if map frame doesn't exists
+        """
+        if self.instruction.FindInstructionByType('map'):
+            mapId = self.instruction.FindInstructionByType('map').id
+        else:
+            mapId = None
+
+        if not type_id:
+            if not mapId:
+                GMessage(message=_("Please, create map frame first."))
+                return False
+        return True
+
     def InstructionFile(self):
         """Creates mapping instructions"""
 
@@ -415,7 +433,9 @@ class PsMapFrame(wx.Frame):
             try:
                 im = PILImage.open(event.userData['filename'])
                 if self.instruction[self.pageId]['Orientation'] == 'Landscape':
-                    im = im.rotate(270)
+                    import numpy as np
+                    im_array = np.array(im)
+                    im = PILImage.fromarray(np.rot90(im_array, 3))
 
                 # hack for Windows, change method for loading EPS
                 if sys.platform == 'win32':
@@ -653,15 +673,9 @@ class PsMapFrame(wx.Frame):
             id = self.instruction.FindInstructionByType('raster').id
         else:
             id = None
-        if self.instruction.FindInstructionByType('map'):
-            mapId = self.instruction.FindInstructionByType('map').id
-        else:
-            mapId = None
 
-        if not id:
-            if not mapId:
-                GMessage(message=_("Please, create map frame first."))
-                return
+        if not self._checkMapFrameExists(type_id=id):
+            return
 
 ##        dlg = RasterDialog(self, id = id, settings = self.instruction)
 # dlg.ShowModal()
@@ -679,14 +693,9 @@ class PsMapFrame(wx.Frame):
             id = self.instruction.FindInstructionByType('vector').id
         else:
             id = None
-        if self.instruction.FindInstructionByType('map'):
-            mapId = self.instruction.FindInstructionByType('map').id
-        else:
-            mapId = None
-        if not id:
-            if not mapId:
-                GMessage(message=_("Please, create map frame first."))
-                return
+
+        if not self._checkMapFrameExists(type_id=id):
+            return
 
 ##        dlg = MainVectorDialog(self, id = id, settings = self.instruction)
 # dlg.ShowModal()
@@ -864,6 +873,9 @@ class PsMapFrame(wx.Frame):
             id = self.instruction.FindInstructionByType('labels').id
         else:
             id = None
+
+        if not self._checkMapFrameExists(type_id=id):
+            return
 
         if 'labels' not in self.openDialogs:
             dlg = LabelsDialog(self, id=id, settings=self.instruction)
@@ -1914,7 +1926,7 @@ class PsMapBufferedWindow(wx.Window):
                         pPaper = points[0]
                     pCanvas = self.CanvasPaperCoordinates(
                         rect=Rect2DPS(pPaper, (0, 0)), canvasToPaper=False)[:2]
-                    bounds = wx.RectPP(pCanvas, pos)
+                    bounds = wx.Rect(pCanvas, pos)
                     self.DrawGraphics(
                         drawid=self.dragId,
                         shape='line',
@@ -1965,7 +1977,9 @@ class PsMapBufferedWindow(wx.Window):
                 rect = self.pdcObj.GetIdBounds(id)
                 self.instruction[id]['rect'] = self.CanvasPaperCoordinates(
                     rect=rect, canvasToPaper=True)
-                rect.OffsetXY(rect.GetWidth() / 2, rect.GetHeight() / 2)
+                rect.Offset(
+                    dx=rect.GetWidth() / 2, dy=rect.GetHeight() / 2,
+                )
                 self.instruction[id]['where'] = self.CanvasPaperCoordinates(
                     rect=rect, canvasToPaper=True)[: 2]
                 self.RecalculateEN()
@@ -1979,10 +1993,10 @@ class PsMapBufferedWindow(wx.Window):
                 yDiff = newRect[1] - oldRect[1]
                 self.instruction[id]['rect'] = newRect
 
-                point1 = wx.Point2D(
-                    xDiff, yDiff) + self.instruction[id]['where'][0]
-                point2 = wx.Point2D(
-                    xDiff, yDiff) + self.instruction[id]['where'][1]
+                point1 = wx.Point2D(*self.instruction[id]['where'][0])
+                point2 = wx.Point2D(*self.instruction[id]['where'][1])
+                point1 += wx.Point2D(xDiff, yDiff)
+                point2 += wx.Point2D(xDiff, yDiff)
                 self.instruction[id]['where'] = [point1, point2]
 
                 self.RecalculateEN()
