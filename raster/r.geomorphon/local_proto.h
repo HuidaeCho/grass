@@ -15,7 +15,7 @@
 #endif
 
 
-#ifndef PI2			/* PI/2 */
+#ifndef PI2                     /* PI/2 */
 #define PI2 (2*atan(1))
 #endif
 
@@ -42,7 +42,7 @@ typedef struct
     char elevname[150];
     RASTER_MAP_TYPE raster_type;
     FCELL **elev;
-    int fd;			/* file descriptor */
+    int fd;                     /* file descriptor */
 } MAPS;
 
 typedef struct
@@ -54,24 +54,24 @@ typedef struct
     int pattern[NUM_DIRS];
     float elevation[NUM_DIRS];
     double distance[NUM_DIRS];
-    double x[NUM_DIRS], y[NUM_DIRS];		/* cartesian coordinates of geomorphon */
+    double x[NUM_DIRS], y[NUM_DIRS];    /* cartesian coordinates of geomorphon */
 } PATTERN;
 
 typedef enum
 {
-    ZERO,			/* zero cats do not accept zero category */
-    FL,				/* flat */
-    PK,				/* peak (summit) */
-    RI,				/* ridge */
-    SH,				/* shoulder */
-    SP,				/* spur (convex slope) */
-    SL,				/* slope */
-    HL,				/* hollow (concave slope) */
-    FS,				/* footslope */
-    VL,				/* valley */
-    PT,				/* pit (depression) */
-    __,				/* error (impossible) */
-    CNT				/* counter */
+    ZERO,                       /* zero cats do not accept zero category */
+    FL,                         /* flat */
+    PK,                         /* peak (summit) */
+    RI,                         /* ridge */
+    SH,                         /* shoulder */
+    SP,                         /* spur (convex slope) */
+    SL,                         /* slope */
+    HL,                         /* hollow (concave slope) */
+    FS,                         /* footslope */
+    VL,                         /* valley */
+    PT,                         /* pit (depression) */
+    __,                         /* error (impossible) */
+    CNT                         /* counter */
 } FORMS;
 
 /* main */
@@ -82,7 +82,6 @@ GLOBAL double search_distance, flat_distance;
 GLOBAL double flat_threshold, flat_threshold_height;
 GLOBAL struct Cell_head window;
 GLOBAL int cell_step;
-GLOBAL unsigned int global_ternary_codes[6562];
 
 /* memory */
 int open_map(MAPS * rast);
@@ -95,6 +94,7 @@ int write_contrast_colors(char *);
 int calc_pattern(PATTERN * pattern, int row, int cur_row, int col);
 
 /* geom */
+void generate_ternary_codes();
 unsigned int ternary_rotate(unsigned int value);
 FORMS determine_form(int num_plus, int num_minus);
 int determine_binary(int *pattern, int sign);
@@ -105,7 +105,7 @@ float exposition(float *elevation);
 float range(float *elevation);
 float variance(float *elevation, int n);
 int shape(PATTERN * pattern, int pattern_size, float *azimuth,
-	  float *elongation, float *width);
-float extends(PATTERN * pattern, int pattern_size);
+          float *elongation, float *width);
+float extends(PATTERN * pattern);
 int radial2cartesian(PATTERN *);
 #endif
