@@ -42,7 +42,7 @@ from gui_core.forms import CmdPanel
 from gui_core.gselect import OgrTypeSelect, GdalSelect, SubGroupSelect
 from gui_core.widgets import GListCtrl, GNotebook, LayersList, \
     LayersListValidator
-from gui_core.wrap import Button, StaticText, StaticBox
+from gui_core.wrap import Button, CloseButton, StaticText, StaticBox
 from core.utils import GetValidLayerName
 from core.settings import UserSettings, GetDisplayVectSettings
 
@@ -102,6 +102,9 @@ class ImportDialog(wx.Dialog):
                 key='overwrite',
                 subkey='enabled'))
         self.overwrite.Bind(wx.EVT_CHECKBOX, self.OnCheckOverwrite)
+        if UserSettings.Get(group='cmd', key='overwrite',
+                            subkey='enabled'):
+            self.list.validate = False
 
         self.add = wx.CheckBox(parent=self.panel, id=wx.ID_ANY)
         self.closeOnFinish = wx.CheckBox(parent=self.panel, id=wx.ID_ANY,
@@ -116,14 +119,12 @@ class ImportDialog(wx.Dialog):
         # buttons
         #
         # cancel
-        self.btn_close = Button(parent=self.panel, id=wx.ID_CLOSE)
+        self.btn_close = CloseButton(parent=self.panel)
         self.btn_close.SetToolTip(_("Close dialog"))
         self.btn_close.Bind(wx.EVT_BUTTON, self.OnClose)
         # run
         self.btn_run = Button(
-            parent=self.panel,
-            id=wx.ID_OK,
-            label=_("&Import"))
+            parent=self.panel, id=wx.ID_OK, label=_("&Import"))
         self.btn_run.SetToolTip(_("Import selected layers"))
         self.btn_run.SetDefault()
         self.btn_run.Bind(wx.EVT_BUTTON, self.OnRun)
@@ -138,13 +139,6 @@ class ImportDialog(wx.Dialog):
                               name='source')
 
         self.createSettingsPage()
-
-        # Enable copying to clipboard with cmd+c from dialog on macOS
-        # (default key binding will close the dialog), trac #3592
-        if sys.platform == "darwin":
-            self.Bind(wx.EVT_MENU, self.OnCopyToClipboard, id=wx.ID_COPY)
-            self.accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord("C"), wx.ID_COPY)])
-            self.SetAcceleratorTable(self.accel_tbl)
 
     def createSettingsPage(self):
 
@@ -264,9 +258,7 @@ class ImportDialog(wx.Dialog):
     def _validateOutputMapName(self):
         """Enable/disable output map name validation according the
         overwrite state"""
-        if not self.overwrite.IsChecked() or not \
-           UserSettings.Get(group='cmd', key='overwrite',
-                            subkey='enabled'):
+        if not self.overwrite.IsChecked():
             if not self.list.GetValidator().\
                Validate(win=self.list, validate_all=True):
                 return False
@@ -355,13 +347,6 @@ class ImportDialog(wx.Dialog):
     def OnCmdDone(self, event):
         """Do what has to be done after importing"""
         pass
-
-    def OnCopyToClipboard(self, event):
-        """Copy selected text in dialog to the clipboard"""
-        try:
-            wx.Window.FindFocus().Copy()
-        except:
-            pass
 
     def _getLayersToReprojetion(self, projMatch_idx, grassName_idx):
         """If there are layers with different projection from loation projection,
@@ -772,7 +757,7 @@ class GdalOutputDialog(wx.Dialog):
         dialogSizer.Add(
             btnSizer,
             proportion=0,
-            flag=wx.ALIGN_CENTER_VERTICAL | wx.BOTTOM | wx.TOP | wx.ALIGN_RIGHT,
+            flag=wx.BOTTOM | wx.TOP | wx.ALIGN_RIGHT,
             border=10)
 
         self.panel.SetAutoLayout(True)

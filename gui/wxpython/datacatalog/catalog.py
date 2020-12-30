@@ -21,8 +21,12 @@ import os
 from core.debug import Debug
 from datacatalog.tree import DataCatalogTree
 from datacatalog.toolbars import DataCatalogToolbar
+from gui_core.infobar import InfoBar
+from datacatalog.infomanager import DataCatalogInfoManager
 
 from grass.pydispatch.signal import Signal
+
+from grass.grassdb.checks import is_current_mapset_in_demolocation
 
 
 class DataCatalog(wx.Panel):
@@ -34,6 +38,7 @@ class DataCatalog(wx.Panel):
         self.showNotification = Signal('DataCatalog.showNotification')
         self.parent = parent
         self.baseTitle = title
+        self.giface = giface
         wx.Panel.__init__(self, parent=parent, id=id, **kwargs)
         self.SetName("DataCatalog")
 
@@ -46,23 +51,39 @@ class DataCatalog(wx.Panel):
         self.tree = DataCatalogTree(self, giface=giface)
         self.tree.showNotification.connect(self.showNotification)
 
+        # infobar for data catalog
+        self.infoBar = InfoBar(self)
+
+        # infobar manager for data catalog
+        self.infoManager = DataCatalogInfoManager(infobar=self.infoBar,
+                                                  giface=self.giface)
+        self.tree.showImportDataInfo.connect(self.showImportDataInfo)
+
         # some layout
         self._layout()
+
+        # show data structure infobar for first-time user with proper layout
+        if is_current_mapset_in_demolocation():
+            wx.CallLater(2000, self.showDataStructureInfo)
 
     def _layout(self):
         """Do layout"""
         sizer = wx.BoxSizer(wx.VERTICAL)
-
-        sizer.Add(self.toolbar, proportion=0,
-                  flag=wx.EXPAND)
-
-        sizer.Add(self.tree.GetControl(), proportion=1,
-                  flag=wx.EXPAND)
+        sizer.Add(self.toolbar, proportion=0, flag=wx.EXPAND)
+        sizer.Add(self.infoBar, proportion=0, flag=wx.EXPAND)
+        sizer.Add(self.tree.GetControl(), proportion=1, flag=wx.EXPAND)
 
         self.SetAutoLayout(True)
         self.SetSizer(sizer)
+        self.Fit()
 
         self.Layout()
+
+    def showDataStructureInfo(self):
+        self.infoManager.ShowDataStructureInfo(self.OnCreateLocation)
+
+    def showImportDataInfo(self):
+        self.infoManager.ShowImportDataInfo(self.OnImportOgrLayers, self.OnImportGdalLayers)
 
     def LoadItems(self):
         self.tree.ReloadTreeItems()
@@ -88,6 +109,20 @@ class DataCatalog(wx.Panel):
         """Create new mapset in current location"""
         db_node, loc_node, mapset_node = self.tree.GetCurrentDbLocationMapsetNode()
         self.tree.CreateMapset(db_node, loc_node)
+
+    def OnImportOgrLayers(self, event, cmd=None):
+        """Convert multiple OGR layers to GRASS vector map layers"""
+        from modules.import_export import OgrImportDialog
+        dlg = OgrImportDialog(parent=self, giface=self.giface)
+        dlg.CentreOnScreen()
+        dlg.Show()
+
+    def OnImportGdalLayers(self, event, cmd=None):
+        """Convert multiple GDAL layers to GRASS raster map layers"""
+        from modules.import_export import GdalImportDialog
+        dlg = GdalImportDialog(parent=self, giface=self.giface)
+        dlg.CentreOnScreen()
+        dlg.Show()
 
     def OnCreateLocation(self, event):
         """Create new location"""

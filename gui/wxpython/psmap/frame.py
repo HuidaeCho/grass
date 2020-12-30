@@ -148,9 +148,12 @@ class PsMapFrame(wx.Frame):
         # list of objects to draw
         self.objectId = []
 
+        # we need isolated environment to handle region
+        self.env = os.environ.copy()
+
         # instructions
         self.instruction = Instruction(
-            parent=self, objectsToDraw=self.objectId)
+            parent=self, objectsToDraw=self.objectId, env=self.env)
         # open dialogs
         self.openDialogs = dict()
 
@@ -168,7 +171,8 @@ class PsMapFrame(wx.Frame):
             openDialogs=self.openDialogs,
             pageId=self.pageId,
             objectId=self.objectId,
-            preview=False)
+            preview=False,
+            env=self.env)
 
         self.canvas.SetCursor(self.cursors["default"])
         self.getInitMap()
@@ -184,10 +188,8 @@ class PsMapFrame(wx.Frame):
             cursors=self.cursors,
             pen=self.pen,
             brush=self.brush,
-            preview=True)
-
-        # set WIND_OVERRIDE
-        grass.use_temp_region()
+            preview=True,
+            env=self.env)
 
         self.toolbar.SelectDefault()
 
@@ -202,7 +204,6 @@ class PsMapFrame(wx.Frame):
         # workaround for http://trac.wxwidgets.org/ticket/13628
         self.SetSize(self.GetBestSize())
 
-        self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING, self.OnPageChanging)
         self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
         self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.Bind(EVT_CMD_DONE, self.OnCmdDone)
@@ -257,6 +258,14 @@ class PsMapFrame(wx.Frame):
                 GMessage(message=_("Please, create map frame first."))
                 return False
         return True
+
+    def _switchToPage(self, page_index=0):
+        """Switch to page (default to Draft page)
+
+        :param int page_index: page index where you want to switch
+        """
+        self.book.SetSelection(page_index)
+        self.currentPage = page_index
 
     def InstructionFile(self):
         """Creates mapping instructions"""
@@ -327,7 +336,7 @@ class PsMapFrame(wx.Frame):
         instrFileFd.close()
 
         temp = False
-        regOld = grass.region()
+        regOld = grass.region(env=self.env)
 
         if pdf:
             pdfname = filename
@@ -341,7 +350,8 @@ class PsMapFrame(wx.Frame):
                 if self.instruction.FindInstructionByType('map'):
                     mapId = self.instruction.FindInstructionByType('map').id
                     SetResolution(dpi=100, width=self.instruction[mapId]['rect'][
-                                  2], height=self.instruction[mapId]['rect'][3])
+                                  2], height=self.instruction[mapId]['rect'][3],
+                                  env=self.env)
 
         cmd = ['ps.map', '--overwrite']
         if os.path.splitext(filename)[1] == '.eps':
@@ -359,6 +369,7 @@ class PsMapFrame(wx.Frame):
 
         self.cmdThread.RunCmd(
             cmd,
+            env=self.env,
             userData={
                 'instrFile': instrFile,
                 'filename': filename,
@@ -423,8 +434,9 @@ class PsMapFrame(wx.Frame):
         # show preview only when user doesn't want to create ps or pdf
         if havePILImage and event.userData[
                 'temp'] and not event.userData['pdfname']:
-            RunCommand('g.region', cols=event.userData['regionOld'][
-                       'cols'], rows=event.userData['regionOld']['rows'])
+            self.env['GRASS_REGION'] = grass.region_env(cols=event.userData['regionOld']['cols'],
+                                                        rows=event.userData['regionOld']['rows'],
+                                                        env=self.env)
             # wx.BusyInfo does not display the message
             busy = wx.BusyInfo(
                 _("Generating preview, wait please"),
@@ -540,7 +552,7 @@ class PsMapFrame(wx.Frame):
     def LoadFile(self, filename):
         """Load file and read instructions"""
         readObjectId = []
-        readInstruction = Instruction(parent=self, objectsToDraw=readObjectId)
+        readInstruction = Instruction(parent=self, objectsToDraw=readObjectId, env=self.env)
         ok = readInstruction.Read(filename)
         if not ok:
             GMessage(_("Failed to read file %s.") % filename)
@@ -560,7 +572,7 @@ class PsMapFrame(wx.Frame):
     def OnPageSetup(self, event=None):
         """Specify paper size, margins and orientation"""
         id = self.instruction.FindInstructionByType('page').id
-        dlg = PageSetupDialog(self, id=id, settings=self.instruction)
+        dlg = PageSetupDialog(self, id=id, settings=self.instruction, env=self.env)
         dlg.CenterOnParent()
         val = dlg.ShowModal()
         if val == wx.ID_OK:
@@ -644,6 +656,7 @@ class PsMapFrame(wx.Frame):
                         parent=self,
                         id=id,
                         settings=self.instruction,
+                        env=self.env,
                         notebook=notebook)
                     self.openDialogs['mapNotebook'] = dlg
                 self.openDialogs['mapNotebook'].Show()
@@ -656,6 +669,7 @@ class PsMapFrame(wx.Frame):
                             parent=self,
                             id=id,
                             settings=self.instruction,
+                            env=self.env,
                             notebook=notebook)
                         self.openDialogs['map'] = dlg
                     self.openDialogs['map'].Show()
@@ -683,7 +697,7 @@ class PsMapFrame(wx.Frame):
             self.openDialogs['mapNotebook'].notebook.ChangeSelection(1)
         else:
             if 'raster' not in self.openDialogs:
-                dlg = RasterDialog(self, id=id, settings=self.instruction)
+                dlg = RasterDialog(self, id=id, settings=self.instruction, env=self.env)
                 self.openDialogs['raster'] = dlg
             self.openDialogs['raster'].Show()
 
@@ -703,7 +717,7 @@ class PsMapFrame(wx.Frame):
             self.openDialogs['mapNotebook'].notebook.ChangeSelection(2)
         else:
             if 'vector' not in self.openDialogs:
-                dlg = MainVectorDialog(self, id=id, settings=self.instruction)
+                dlg = MainVectorDialog(self, id=id, settings=self.instruction, env=self.env)
                 self.openDialogs['vector'] = dlg
             self.openDialogs['vector'].Show()
 
@@ -719,7 +733,7 @@ class PsMapFrame(wx.Frame):
             id = None
 
         if 'scalebar' not in self.openDialogs:
-            dlg = ScalebarDialog(self, id=id, settings=self.instruction)
+            dlg = ScalebarDialog(self, id=id, settings=self.instruction, env=self.env)
             self.openDialogs['scalebar'] = dlg
         self.openDialogs['scalebar'].Show()
 
@@ -737,7 +751,7 @@ class PsMapFrame(wx.Frame):
         if 'rasterLegend' not in self.openDialogs:
             dlg = LegendDialog(
                 self, id=[idR, idV],
-                settings=self.instruction, page=page)
+                settings=self.instruction, env=self.env, page=page)
             self.openDialogs['rasterLegend'] = dlg
             self.openDialogs['vectorLegend'] = dlg
         self.openDialogs['rasterLegend'].notebook.ChangeSelection(page)
@@ -750,7 +764,7 @@ class PsMapFrame(wx.Frame):
             id = None
 
         if 'mapinfo' not in self.openDialogs:
-            dlg = MapinfoDialog(self, id=id, settings=self.instruction)
+            dlg = MapinfoDialog(self, id=id, settings=self.instruction, env=self.env)
             self.openDialogs['mapinfo'] = dlg
         self.openDialogs['mapinfo'].Show()
 
@@ -761,7 +775,7 @@ class PsMapFrame(wx.Frame):
             position = self.openDialogs['image'].GetPosition()
             self.openDialogs['image'].OnApply(event=None)
             self.openDialogs['image'].Destroy()
-        dlg = ImageDialog(self, id=id, settings=self.instruction)
+        dlg = ImageDialog(self, id=id, settings=self.instruction, env=self.env)
         self.openDialogs['image'] = dlg
         if position:
             dlg.SetPosition(position)
@@ -775,7 +789,7 @@ class PsMapFrame(wx.Frame):
             id = None
 
         if 'northArrow' not in self.openDialogs:
-            dlg = NorthArrowDialog(self, id=id, settings=self.instruction)
+            dlg = NorthArrowDialog(self, id=id, settings=self.instruction, env=self.env)
             self.openDialogs['northArrow'] = dlg
         self.openDialogs['northArrow'].Show()
 
@@ -786,7 +800,7 @@ class PsMapFrame(wx.Frame):
             position = self.openDialogs['text'].GetPosition()
             self.openDialogs['text'].OnApply(event=None)
             self.openDialogs['text'].Destroy()
-        dlg = TextDialog(self, id=id, settings=self.instruction)
+        dlg = TextDialog(self, id=id, settings=self.instruction, env=self.env)
         self.openDialogs['text'] = dlg
         if position:
             dlg.SetPosition(position)
@@ -796,6 +810,7 @@ class PsMapFrame(wx.Frame):
         """Add point action selected"""
         self.mouse["use"] = "addPoint"
         self.canvas.SetCursor(self.cursors["cross"])
+        self._switchToPage()
 
     def AddPoint(self, id=None, coordinates=None):
         """Add point and open property dialog.
@@ -809,7 +824,7 @@ class PsMapFrame(wx.Frame):
             self.openDialogs['point'].OnApply(event=None)
             self.openDialogs['point'].Destroy()
         dlg = PointDialog(self, id=id, settings=self.instruction,
-                          coordinates=coordinates)
+                          coordinates=coordinates, env=self.env)
         self.openDialogs['point'] = dlg
         if position:
             dlg.SetPosition(position)
@@ -821,6 +836,7 @@ class PsMapFrame(wx.Frame):
         """Add line action selected"""
         self.mouse["use"] = "addLine"
         self.canvas.SetCursor(self.cursors["cross"])
+        self._switchToPage()
 
     def AddLine(self, id=None, coordinates=None):
         """Add line and open property dialog.
@@ -834,7 +850,8 @@ class PsMapFrame(wx.Frame):
             self.openDialogs['line'].OnApply(event=None)
             self.openDialogs['line'].Destroy()
         dlg = RectangleDialog(self, id=id, settings=self.instruction,
-                              type='line', coordinates=coordinates)
+                              type='line', coordinates=coordinates,
+                              env=self.env)
         self.openDialogs['line'] = dlg
         if position:
             dlg.SetPosition(position)
@@ -846,6 +863,7 @@ class PsMapFrame(wx.Frame):
         """Add rectangle action selected"""
         self.mouse["use"] = "addRectangle"
         self.canvas.SetCursor(self.cursors["cross"])
+        self._switchToPage()
 
     def AddRectangle(self, id=None, coordinates=None):
         """Add rectangle and open property dialog.
@@ -859,7 +877,8 @@ class PsMapFrame(wx.Frame):
             self.openDialogs['rectangle'].OnApply(event=None)
             self.openDialogs['rectangle'].Destroy()
         dlg = RectangleDialog(self, id=id, settings=self.instruction,
-                              type='rectangle', coordinates=coordinates)
+                              type='rectangle', coordinates=coordinates,
+                              env=self.env)
         self.openDialogs['rectangle'] = dlg
         if position:
             dlg.SetPosition(position)
@@ -878,7 +897,7 @@ class PsMapFrame(wx.Frame):
             return
 
         if 'labels' not in self.openDialogs:
-            dlg = LabelsDialog(self, id=id, settings=self.instruction)
+            dlg = LabelsDialog(self, id=id, settings=self.instruction, env=self.env)
             self.openDialogs['labels'] = dlg
         self.openDialogs['labels'].Show()
 
@@ -975,10 +994,11 @@ class PsMapFrame(wx.Frame):
         page = self.instruction.FindInstructionByType('page')
         mapInitRect = GetMapBounds(
             instrFile, portrait=(
-                page['Orientation'] == 'Portrait'))
+                page['Orientation'] == 'Portrait'),
+            env=self.env)
         grass.try_remove(instrFile)
 
-        region = grass.region()
+        region = grass.region(env=self.env)
         units = UnitConversion(self)
         realWidth = units.convert(
             value=abs(region['w'] - region['e']),
@@ -993,7 +1013,7 @@ class PsMapFrame(wx.Frame):
 
         if not id:
             id = NewId()
-            initMap = InitMap(id)
+            initMap = InitMap(id, env=self.env)
             self.instruction.AddInstruction(initMap)
         self.instruction[id].SetInstruction(
             dict(rect=mapInitRect, scale=scale))
@@ -1132,11 +1152,13 @@ class PsMapFrame(wx.Frame):
             if itype in ('map', 'vector', 'raster', 'labels'):
 
                 if itype == 'raster':  # set resolution
-                    info = grass.raster_info(self.instruction[id]['raster'])
-                    RunCommand(
-                        'g.region',
-                        nsres=info['nsres'],
-                        ewres=info['ewres'])
+                    try:
+                        info = grass.raster_info(self.instruction[id]['raster'])
+                        self.env['GRASS_REGION'] = grass.region_env(nsres=info['nsres'],
+                                                                    ewres=info['ewres'],
+                                                                    env=self.env)
+                    except grass.CalledModuleError:  # fails after switching location
+                        pass
                     # change current raster in raster legend
 
                 if 'rasterLegend' in self.openDialogs:
@@ -1147,7 +1169,8 @@ class PsMapFrame(wx.Frame):
                 if itype == 'raster':
                     SetResolution(dpi=self.instruction[id]['resolution'],
                                   width=self.instruction[id]['rect'].width,
-                                  height=self.instruction[id]['rect'].height)
+                                  height=self.instruction[id]['rect'].height,
+                                  env=self.env)
                 rectCanvas = self.canvas.CanvasPaperCoordinates(
                     rect=self.instruction[id]['rect'], canvasToPaper=False)
                 self.canvas.RecalculateEN()
@@ -1209,11 +1232,6 @@ class PsMapFrame(wx.Frame):
                 _("Press button with green triangle icon to generate preview."))
         else:
             self.SetStatusText('')
-
-    def OnPageChanging(self, event):
-        """Flatnotebook page is changing"""
-        if self.currentPage == 0 and self.mouse['use'] == 'addMap':
-            event.Veto()
 
     def OnHelp(self, event):
         """Show help"""
@@ -1278,7 +1296,8 @@ class PsMapBufferedWindow(wx.Window):
             self.pageId = kwargs['pageId']
         if 'objectId' in kwargs:
             self.objectId = kwargs['objectId']
-
+        if 'env' in kwargs:
+            self.env = kwargs['env']
         # labels
         self.itemLabelsDict = {'map': _("MAP FRAME"),
                                'rasterLegend': _("RASTER LEGEND"),
@@ -1390,7 +1409,7 @@ class PsMapBufferedWindow(wx.Window):
 
         page = self.instruction[self.pageId]
         if not page:
-            page = PageSetup(id=self.pageId)
+            page = PageSetup(id=self.pageId, env=self.env)
             self.instruction.AddInstruction(page)
 
         ppi = wx.ClientDC(self).GetPPI()
@@ -1434,23 +1453,27 @@ class PsMapBufferedWindow(wx.Window):
                             mapInstr=self.instruction[mapId],
                             x=instr['where'][0][0],
                             y=instr['where'][0][1],
-                            paperToMap=True)
+                            paperToMap=True,
+                            env=self.env)
                         e2, n2 = PaperMapCoordinates(
                             mapInstr=self.instruction[mapId],
                             x=instr['where'][1][0],
                             y=instr['where'][1][1],
-                            paperToMap=True)
+                            paperToMap=True,
+                            env=self.env)
                     else:
                         e1, n1 = PaperMapCoordinates(
                             mapInstr=self.instruction[mapId],
                             x=instr['rect'].GetLeft(),
                             y=instr['rect'].GetTop(),
-                            paperToMap=True)
+                            paperToMap=True,
+                            env=self.env)
                         e2, n2 = PaperMapCoordinates(
                             mapInstr=self.instruction[mapId],
                             x=instr['rect'].GetRight(),
                             y=instr['rect'].GetBottom(),
-                            paperToMap=True)
+                            paperToMap=True,
+                            env=self.env)
                     instr['east1'] = e1
                     instr['north1'] = n1
                     instr['east2'] = e2
@@ -1460,7 +1483,8 @@ class PsMapBufferedWindow(wx.Window):
                         mapInstr=self.instruction[mapId],
                         x=instr['where'][0],
                         y=instr['where'][1],
-                        paperToMap=True)
+                        paperToMap=True,
+                        env=self.env)
                     instr['east'], instr['north'] = e, n
 
     def OnPaint(self, event):
@@ -1492,24 +1516,27 @@ class PsMapBufferedWindow(wx.Window):
     def MouseActions(self, event):
         """Mouse motion and button click notifier
         """
+        disable = self.preview and self.mouse['use'] in ('pointer', 'resize',
+                                                         'addMap', 'addPoint',
+                                                         'addLine', 'addRectangle')
         # zoom with mouse wheel
         if event.GetWheelRotation() != 0:
             self.OnMouseWheel(event)
 
         # left mouse button pressed
-        elif event.LeftDown():
+        elif event.LeftDown() and not disable:
             self.OnLeftDown(event)
 
         # left mouse button released
-        elif event.LeftUp():
+        elif event.LeftUp() and not disable:
             self.OnLeftUp(event)
 
         # dragging
-        elif event.Dragging():
+        elif event.Dragging() and not disable:
             self.OnDragging(event)
 
         # double click
-        elif event.ButtonDClick():
+        elif event.ButtonDClick() and not disable:
             self.OnButtonDClick(event)
 
         # middle mouse button pressed
@@ -1650,7 +1677,7 @@ class PsMapBufferedWindow(wx.Window):
 
             dlg = MapDialog(
                 parent=self.parent, id=[None, None, None],
-                settings=self.instruction, rect=rectPaper)
+                settings=self.instruction, env=self.env, rect=rectPaper)
             self.openDialogs['map'] = dlg
             self.openDialogs['map'].Show()
 
@@ -1677,18 +1704,19 @@ class PsMapBufferedWindow(wx.Window):
 
                         scale, foo, rect = AutoAdjust(
                             self, scaleType=0, map=self.instruction[mapId]
-                            ['map'],
+                            ['map'], env=self.env,
                             mapType=self.instruction[mapId]['mapType'],
                             rect=self.instruction[mapId]['rect'])
 
                     elif self.instruction[mapId]['scaleType'] == 1:
                         scale, foo, rect = AutoAdjust(
-                            self, scaleType=1,
+                            self, scaleType=1, env=self.env,
                             region=self.instruction[mapId]['region'],
                             rect=self.instruction[mapId]['rect'])
                     else:
                         scale, foo, rect = AutoAdjust(
-                            self, scaleType=2, rect=self.instruction[mapId]['rect'])
+                            self, scaleType=2, rect=self.instruction[mapId]['rect'],
+                            env=self.env)
                     self.instruction[mapId]['rect'] = rect
                     self.instruction[mapId]['scale'] = scale
 
@@ -1704,11 +1732,12 @@ class PsMapBufferedWindow(wx.Window):
 
                 elif self.instruction[mapId]['scaleType'] == 3:
                     ComputeSetRegion(
-                        self, mapDict=self.instruction[mapId].GetInstruction())
+                        self, mapDict=self.instruction[mapId].GetInstruction(), env=self.env)
                 # check resolution
                 SetResolution(dpi=self.instruction[mapId]['resolution'],
                               width=self.instruction[mapId]['rect'].width,
-                              height=self.instruction[mapId]['rect'].height)
+                              height=self.instruction[mapId]['rect'].height,
+                              env=self.env)
 
                 self.RedrawSelectBox(mapId)
                 self.Zoom(zoomFactor=1, view=(0, 0))

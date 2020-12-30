@@ -368,8 +368,7 @@ class NewVectorDialog(VectorDialog):
                 proportion=0,
                 flag=wx.ALIGN_CENTER_VERTICAL)
             keySizer.AddSpacer(10)
-            keySizer.Add(self.keycol, proportion=0,
-                         flag=wx.ALIGN_RIGHT)
+            keySizer.Add(self.keycol, proportion=0)
             self.dataSizer.Add(keySizer, proportion=1,
                                flag=wx.EXPAND | wx.ALL, border=1)
 
@@ -1974,7 +1973,7 @@ class ImageSizeDialog(wx.Dialog):
         btnsizer.Realize()
 
         sizer.Add(btnsizer, proportion=0,
-                  flag=wx.EXPAND | wx.ALIGN_RIGHT | wx.ALL, border=5)
+                  flag=wx.EXPAND | wx.ALL, border=5)
 
         self.panel.SetSizer(sizer)
         sizer.Fit(self.panel)

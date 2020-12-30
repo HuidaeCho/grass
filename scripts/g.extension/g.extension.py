@@ -68,6 +68,15 @@
 #% required: no
 #% multiple: yes
 #%end
+#%option
+#% key: branch
+#% type: string
+#% key_desc: branch
+#% description: Specific branch to fetch addon from (only used when fetching from git)
+#% required: no
+#% multiple: no
+#% answer: main
+#%end
 
 #%flag
 #% key: l
@@ -200,7 +209,7 @@ def download_addons_paths_file(
     :param str url: url address
     :param str response_format: content type
 
-    :return response: urllib.request.urlopen response object
+    :return response: urllib.request.urlopen response object or None
     """
     try:
         response = urlopen(url, *args, **kwargs)
@@ -233,15 +242,23 @@ def download_addons_paths_file(
         return response
 
     except HTTPError as err:
-        gscript.fatal(
-            _(
-                "Download file from <{url}>, "
-                "return status code {code}, ".format(
-                    url=url,
-                    code=err,
+        if (
+                err.code == 403 and
+                err.msg == 'rate limit exceeded'
+        ):
+            gscript.warning(
+                _(
+                    "The download of the json file with add-ons paths "
+                    "from the github server wasn't successful, "
+                    "{}. The previous downloaded json file "
+                    " will be used if exists.".format(err.msg)
                 ),
-            ),
-        )
+            )
+        else:
+            return download_addons_paths_file(
+                url=url.replace('main', 'master'),
+                response_format=response_format,
+            )
     except URLError:
         gscript.fatal(
             _(
@@ -267,9 +284,8 @@ def etree_fromurl(url):
 
 def check_progs():
     """Check if the necessary programs are available"""
-    # TODO: we need svn for the Subversion repo downloads
-    # also git would be tested once supported
-    for prog in ('make', 'gcc'):
+    # git to be tested once supported instead of `svn`
+    for prog in ('make', 'gcc', 'svn'):
         if not grass.find_program(prog, '--help'):
             grass.fatal(_("'%s' required. Please install '%s' first.")
                         % (prog, prog))
@@ -813,7 +829,7 @@ def write_xml_toolboxes(name, tree=None):
     file_.close()
 
 
-def install_extension(source, url, xmlurl):
+def install_extension(source, url, xmlurl, branch):
     """Install extension (e.g. one module) or a toolbox (list of modules)"""
     gisbase = os.getenv('GISBASE')
     if not gisbase:
@@ -854,7 +870,7 @@ def install_extension(source, url, xmlurl):
             ret1, new_modules_ext, new_files_ext = install_extension_win(extension)
         else:
             ret1, new_modules_ext, new_files_ext, tmp_dir = install_extension_std_platforms(extension,
-                                                            source=source, url=url)
+                                                            source=source, url=url, branch=branch)
         if not flags['d'] and not flags['i']:
             edict[extension]['mlist'].extend(new_modules_ext)
             edict[extension]['flist'].extend(new_files_ext)
@@ -1222,10 +1238,10 @@ def install_extension_win(name):
     for r, d, f in os.walk(srcdir):
         for file in f:
             if file.endswith('.py'):
-                modulename = file.rstrip(".py")
+                modulename = file.rsplit('.py')[0]
                 module_list.append(modulename)
             if file.endswith('.exe'):
-                modulename = file.rstrip(".exe")
+                modulename = file.rsplit('.exe')[0]
                 module_list.append(modulename)
     # remove duplicates in case there are .exe wrappers for python scripts
     module_list = set(module_list)
@@ -1427,22 +1443,40 @@ extract_tar.supported_formats = ['tar.gz', 'gz', 'bz2', 'tar', 'gzip', 'targz']
 
 
 def download_source_code(source, url, name, outdev,
-                         directory=None, tmpdir=None):
+                         directory=None, tmpdir=None, branch=None):
     """Get source code to a local directory for compilation"""
-    gscript.verbose("Downloading source code for <{name}> from <{url}>"
-                    " which is identified as '{source}' type of source..."
-                    .format(source=source, url=url, name=name))
+    gscript.verbose(_("Type of source identified as '{source}'.")
+                    .format(source=source))
     if source == 'official':
+        gscript.message(_("Fetching <%s> from "
+                          "GRASS GIS Addons repository (be patient)...") % name)
         download_source_code_official_github(url, name, outdev, directory)
     elif source == 'svn':
+        gscript.message(_("Fetching <{name}> from "
+                          "<{url}> (be patient)...").format(name=name, url=url))
         download_source_code_svn(url, name, outdev, directory)
     elif source in ['remote_zip']:  # , 'official'
+        gscript.message(_("Fetching <{name}> from "
+                          "<{url}> (be patient)...").format(name=name, url=url))
         # we expect that the module.zip file is not by chance in the archive
         zip_name = os.path.join(tmpdir, 'extension.zip')
         try:
             response = urlopen(url)
         except URLError:
-            grass.fatal(_("Extension <%s> not found") % name)
+            # Try download add-on from 'master' branch if default "main" fails
+            if branch == "main":
+                try:
+                    url = url.replace('main', 'master')
+                    gscript.message(_("Expected default branch not found. "
+                                    "Trying again from <{url}>...")
+                                    .format(url=url))
+                    response = urlopen(url)
+                except URLError:
+                    grass.fatal(_("Extension <{name}> not found. Please check "
+                                  "'url' and 'branch' options".format(name=name)))
+            else:
+                grass.fatal(_("Extension <%s> not found") % name)
+
         with open(zip_name, 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
         extract_zip(name=zip_name, directory=directory, tmpdir=tmpdir)
@@ -1472,17 +1506,10 @@ def download_source_code(source, url, name, outdev,
     assert os.path.isdir(directory)
 
 
-def install_extension_std_platforms(name, source, url):
+def install_extension_std_platforms(name, source, url, branch):
     """Install extension on standard platforms"""
     gisbase = os.getenv('GISBASE')
     source_url = 'https://github.com/OSGeo/grass-addons/tree/master/grass7/'
-
-    if source == 'official':
-        gscript.message(_("Fetching <%s> from "
-                          "GRASS GIS Addons repository (be patient)...") % name)
-    else:
-        gscript.message(_("Fetching <{name}> from "
-                          "<{url}> (be patient)...").format(name=name, url=url))
 
     # to hide non-error messages from subprocesses
     if grass.verbosity() <= 2:
@@ -1493,9 +1520,12 @@ def install_extension_std_platforms(name, source, url):
     os.chdir(TMPDIR)  # this is just to not leave something behind
     srcdir = os.path.join(TMPDIR, name)
     download_source_code(source=source, url=url, name=name,
-                         outdev=outdev, directory=srcdir, tmpdir=TMPDIR)
+                         outdev=outdev, directory=srcdir, tmpdir=TMPDIR,
+                         branch=branch)
     os.chdir(srcdir)
 
+    pgm_not_found_message = _('Module name not found.'
+                              ' Check module Makefile syntax (PGM variable).')
     # collect module names
     module_list = list()
     for r, d, f in os.walk(srcdir):
@@ -1504,9 +1534,15 @@ def install_extension_std_platforms(name, source, url):
                 # get the module name: PGM = <module name>
                 with open(os.path.join(r, 'Makefile')) as fp:
                     for line in fp.readlines():
-                        if "PGM =" in line:
-                            modulename = line.split('=')[1].strip()
-                            module_list.append(modulename)
+                        if re.match(r'PGM.*.=|PGM=', line):
+                            try:
+                                modulename = line.split('=')[1].strip()
+                                if modulename:
+                                    module_list.append(modulename)
+                                else:
+                                    grass.fatal(pgm_not_found_message)
+                            except IndexError:
+                                grass.fatal(pgm_not_found_message)
 
     # change shebang from python to python3
     pyfiles = []
@@ -2004,21 +2040,21 @@ KNOWN_HOST_SERVICES_INFO = {
         'ignored_suffixes': ['.zip', '.tar.gz'],
         'possible_starts': ['', 'https://', 'http://'],
         'url_start': 'https://',
-        'url_end': '/archive/master.zip',
+        'url_end': '/archive/{branch}.zip',
     },
     'GitLab': {
         'domain': 'gitlab.com',
         'ignored_suffixes': ['.zip', '.tar.gz', '.tar.bz2', '.tar'],
         'possible_starts': ['', 'https://', 'http://'],
         'url_start': 'https://',
-        'url_end': '/-/archive/master/{name}-master.zip',
+        'url_end': '/-/archive/{branch}/{name}-{branch}.zip',
     },
     'Bitbucket': {
         'domain': 'bitbucket.org',
         'ignored_suffixes': ['.zip', '.tar.gz', '.gz', '.bz2'],
         'possible_starts': ['', 'https://', 'http://'],
         'url_start': 'https://',
-        'url_end': '/get/master.zip',
+        'url_end': '/get/{branch}.zip',
     },
 }
 
@@ -2026,7 +2062,7 @@ KNOWN_HOST_SERVICES_INFO = {
 # https://gitlab.com/user/reponame/repository/archive.zip?ref=b%C3%A9po
 
 
-def resolve_known_host_service(url, name):
+def resolve_known_host_service(url, name, branch):
     """Determine source type and full URL for known hosting service
 
     If the service is not determined from the provided URL, tuple with
@@ -2056,10 +2092,13 @@ def resolve_known_host_service(url, name):
             actual_start = match['url_start']
         else:
             actual_start = ''
+        if 'branch' in  match['url_end']:
+            suffix = match['url_end'].format(name=name, branch=branch)
+        else:
+            suffix = match['url_end'].format(name=name)
         url = '{prefix}{base}{suffix}'.format(prefix=actual_start,
                                               base=url.rstrip('/'),
-                                              suffix=match['url_end'].format(
-                                                  name=name))
+                                              suffix=suffix)
         gscript.verbose(_("Will use the following URL for download: {0}")
                         .format(url))
         return 'remote_zip', url
@@ -2068,7 +2107,7 @@ def resolve_known_host_service(url, name):
 
 
 # TODO: add also option to enforce the source type
-def resolve_source_code(url=None, name=None):
+def resolve_source_code(url=None, name=None, branch=None):
     """Return type and URL or path of the source code
 
     Local paths are not presented as URLs to be usable in standard functions.
@@ -2076,7 +2115,7 @@ def resolve_source_code(url=None, name=None):
     has the unfortunate consequence that the not existing files are evaluated
     as remote URLs. When path is not evaluated, Subversion is assumed for
     backwards compatibility. When GitHub repository is specified, ZIP file
-    link is returned. The ZIP is for master branch, not the default one because
+    link is returned. The ZIP is for {branch} branch, not the default one because
     GitHub does not provide the default branch in the URL (July 2015).
 
     :returns: tuple with type of source and full URL or path
@@ -2189,7 +2228,7 @@ def resolve_source_code(url=None, name=None):
                 return suffix, os.path.abspath(url)
     # Handle remote URLs
     else:
-        source, resolved_url = resolve_known_host_service(url, name)
+        source, resolved_url = resolve_known_host_service(url, name, branch)
         if source:
             return source, resolved_url
         # we allow URL to end with =zip or ?zip and not only .zip
@@ -2212,18 +2251,16 @@ def get_addons_paths(gg_addons_base_dir):
     get_addons_paths.json_file = 'addons_paths.json'
 
     url = 'https://api.github.com/repos/OSGeo/grass-addons/git/trees/'\
-        'master?recursive=1'
-    addons_paths = json.loads(
-        gscript.decode(
-            download_addons_paths_file(
-                url=url,
-                response_format='application/json',
-            ).read(),
-        )
+        'main?recursive=1'
+
+    response = download_addons_paths_file(
+        url=url, response_format='application/json',
     )
-    with open(os.path.join(gg_addons_base_dir, get_addons_paths.json_file),
-              'w') as f:
-        json.dump(addons_paths, f)
+    if response:
+        addons_paths = json.loads(gscript.decode(response.read()))
+        with open(os.path.join(gg_addons_base_dir, get_addons_paths.json_file),
+                  'w') as f:
+            json.dump(addons_paths, f)
 
 
 def main():
@@ -2232,6 +2269,7 @@ def main():
         check_progs()
 
     original_url = options['url']
+    branch = options['branch']
 
     # manage proxies
     global PROXIES
@@ -2257,7 +2295,8 @@ def main():
         # but will work only as long as the function does not check
         # if the URL is actually valid or something
         source, url = resolve_source_code(name='dummy',
-                                          url=original_url)
+                                          url=original_url,
+                                          branch=branch)
         xmlurl = resolve_xmlurl_prefix(original_url, source=source)
         list_available_extensions(xmlurl)
         return 0
@@ -2277,11 +2316,17 @@ def main():
 
     if options['operation'] == 'add':
         check_dirs()
-        get_addons_paths(gg_addons_base_dir=options['prefix'])
+        if original_url == '':
+            """
+            Query GitHub API only if extension will be downloaded
+            from official GRASS GIS addon repository
+            """
+            get_addons_paths(gg_addons_base_dir=options['prefix'])
         source, url = resolve_source_code(name=options['extension'],
-                                          url=original_url)
+                                          url=original_url,
+                                          branch=branch)
         xmlurl = resolve_xmlurl_prefix(original_url, source=source)
-        install_extension(source=source, url=url, xmlurl=xmlurl)
+        install_extension(source=source, url=url, xmlurl=xmlurl, branch=branch)
     else:  # remove
         remove_extension(force=flags['f'])
 
