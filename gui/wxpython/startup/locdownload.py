@@ -72,7 +72,7 @@ LOCATIONS = [
     },
     {
         "label": "Slovakia 3D precipitation voxel data set",
-        "url": "https://grass.osgeo.org/uploads/grass/sampledata/slovakia3d_grass7.tar.gz",
+        "url": "https://grass.osgeo.org/sampledata/slovakia3d_grass7.tar.gz",
     },
     {
         "label": "Fire simulation sample data",
@@ -558,7 +558,7 @@ class LocationDownloadDialog(wx.Dialog):
     Contains the panel and Cancel button.
     """
     def __init__(self, parent, database,
-                 title=_("GRASS GIS Location Download")):
+                 title=_("Location Download")):
         """
         :param database: database to download the location to
         :param title: window title if the default is not appropriate

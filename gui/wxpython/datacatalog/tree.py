@@ -82,55 +82,6 @@ from grass.exceptions import CalledModuleError
 updateMapset, EVT_UPDATE_MAPSET = NewEvent()
 
 
-def filterModel(model, element=None, name=None):
-    """Filter tree model based on type or name of map using regular expressions.
-    Copies tree and remove nodes which don't match."""
-    fmodel = copy.deepcopy(model)
-    nodesToRemove = []
-    if name:
-        try:
-            regex = re.compile(name)
-        except:
-            return fmodel
-    for gisdbase in fmodel.root.children:
-        for location in gisdbase.children:
-            for mapset in location.children:
-                for layer in mapset.children:
-                    if element and layer.data['type'] != element:
-                        nodesToRemove.append(layer)
-                        continue
-                    if name and regex.search(layer.data['name']) is None:
-                        nodesToRemove.append(layer)
-
-    for node in reversed(nodesToRemove):
-        fmodel.RemoveNode(node)
-
-    cleanUpTree(fmodel)
-    return fmodel
-
-
-def cleanUpTree(model):
-    """Removes empty element/mapsets/locations nodes.
-    It first removes empty elements, then mapsets, then locations"""
-    # removes empty mapsets
-    nodesToRemove = []
-    for gisdbase in model.root.children:
-        for location in gisdbase.children:
-            for mapset in location.children:
-                if not mapset.children:
-                    nodesToRemove.append(mapset)
-    for node in reversed(nodesToRemove):
-        model.RemoveNode(node)
-    # removes empty locations
-    nodesToRemove = []
-    for gisdbase in model.root.children:
-        for location in gisdbase.children:
-            if not location.children:
-                nodesToRemove.append(location)
-    for node in reversed(nodesToRemove):
-        model.RemoveNode(node)
-
-
 def getLocationTree(gisdbase, location, queue, mapsets=None):
     """Creates dictionary with mapsets, elements, layers for given location.
     Returns tuple with the dictionary and error (or None)"""
@@ -200,7 +151,7 @@ class MapWatch(PatternMatchingEventHandler):
         PatternMatchingEventHandler.__init__(self, patterns=patterns)
         self.element = element
         self.event_handler = event_handler
-        
+
     def on_created(self, event):
         if (self.element == 'vector' or self.element == 'raster_3d') and not event.is_directory:
             return
@@ -220,7 +171,7 @@ class MapWatch(PatternMatchingEventHandler):
             return
         evt = updateMapset(src_path=event.src_path, event_type=event.event_type,
                            is_directory=event.is_directory, dest_path=event.dest_path)
-        wx.PostEvent(self.event_handler, evt)  
+        wx.PostEvent(self.event_handler, evt)
 
 
 class NameEntryDialog(TextEntryDialog):
@@ -284,18 +235,32 @@ class DataCatalogNode(DictNode):
 
         return _("{name}").format(**data)
 
-    def match(self, **kwargs):
+    def match(self, method='exact', **kwargs):
         """Method used for searching according to given parameters.
 
-        :param value: dictionary value to be matched
-        :param key: data dictionary key
+        :param method: 'exact' for exact match or 'filtering' for filtering by type/name
+        :param kwargs key-value to be matched, filtering method uses 'type' and 'name'
+               where 'name' is compiled regex
         """
         if not kwargs:
             return False
 
-        for key in kwargs:
-            if not (key in self.data and self.data[key] == kwargs[key]):
-                return False
+        if method == 'exact':
+            for key, value in kwargs.items():
+                if not (key in self.data and self.data[key] == value):
+                    return False
+            return True
+        # for filtering
+        if (
+            'type' in kwargs and 'type' in self.data
+            and kwargs['type'] != self.data['type']
+        ):
+            return False
+        if (
+            'name' in kwargs and 'name' in self.data
+            and not kwargs['name'].search(self.data['name'])
+        ):
+            return False
         return True
 
 
@@ -374,7 +339,7 @@ class DataCatalogTree(TreeView):
         self.startEdit.connect(self.OnStartEditLabel)
         self.endEdit.connect(self.OnEditLabel)
         self.Bind(EVT_UPDATE_MAPSET, self.OnWatchdogMapsetReload)
-        
+
         self.observer = None
 
     def _resetSelectVariables(self):
@@ -979,6 +944,8 @@ class DataCatalogTree(TreeView):
                                              mapset=mapset,
                                              element='mapset',
                                              action='new')
+            self.SwitchMapset(grassdb_node.data['name'], location_node.data['name'], mapset,
+                              show_confirmation=True)
 
     def OnCreateMapset(self, event):
         """Create new mapset"""
@@ -1004,7 +971,8 @@ class DataCatalogTree(TreeView):
                 self.showImportDataInfo.emit()
 
             # switch to PERMANENT mapset in newly created location
-            self.SwitchMapset(grassdatabase, location, mapset)
+            self.SwitchMapset(grassdatabase, location, mapset,
+                              show_confirmation=True)
 
     def OnCreateLocation(self, event):
         """Create new location"""
@@ -1536,7 +1504,7 @@ class DataCatalogTree(TreeView):
                 event.Veto()
                 return
 
-    def SwitchMapset(self, grassdb, location, mapset):
+    def SwitchMapset(self, grassdb, location, mapset, show_confirmation=False):
         """
         Switch to location and mapset interactively.
         """
@@ -1544,13 +1512,16 @@ class DataCatalogTree(TreeView):
             genv = gisenv()
             # Switch to mapset in the same location
             if (grassdb == genv['GISDBASE'] and location == genv['LOCATION_NAME']):
-                switch_mapset_interactively(self, self._giface, None, None, mapset)
+                switch_mapset_interactively(self, self._giface, None, None, mapset,
+                                            show_confirmation)
             # Switch to mapset in the same grassdb
             elif grassdb == genv['GISDBASE']:
-                switch_mapset_interactively(self, self._giface, None, location, mapset)
+                switch_mapset_interactively(self, self._giface, None, location, mapset,
+                                            show_confirmation)
             # Switch to mapset in a different grassdb
             else:
-                switch_mapset_interactively(self, self._giface, grassdb, location, mapset)
+                switch_mapset_interactively(self, self._giface, grassdb, location, mapset,
+                                            show_confirmation)
 
     def OnSwitchMapset(self, event):
         """Switch to location and mapset"""
@@ -1592,6 +1563,7 @@ class DataCatalogTree(TreeView):
                 node = self.GetDbNode(grassdb=grassdb)
                 if node:
                     self._reloadGrassDBNode(node)
+                    self.UpdateCurrentDbLocationMapsetNode()
                     self.RefreshNode(node, recursive=True)
             elif action == 'rename':
                 node = self.GetDbNode(grassdb=grassdb,
@@ -1678,28 +1650,26 @@ class DataCatalogTree(TreeView):
             wx.TheClipboard.SetData(do)
             wx.TheClipboard.Close()
 
-    def Filter(self, text):
+    def Filter(self, text, element=None):
         """Filter tree based on name and type."""
-        text = text.strip()
-        if len(text.split(':')) > 1:
-            name = text.split(':')[1].strip()
-            elem = text.split(':')[0].strip()
-            if 'r' == elem:
-                element = 'raster'
-            elif 'r3' == elem:
-                element = 'raster_3d'
-            elif 'v' == elem:
-                element = 'vector'
-            else:
-                element = None
+        name = text.strip()
+        if not name:
+            self._model = self._orig_model
         else:
-            element = None
-            name = text.strip()
+            try:
+                compiled = re.compile(name)
+            except re.error:
+                return
+            if element:
+                self._model = self._orig_model.Filtered(method='filtering', name=compiled, type=element)
+            else:
+                self._model = self._orig_model.Filtered(method='filtering', name=compiled)
 
-        self._model = filterModel(self._orig_model, name=name, element=element)
         self.UpdateCurrentDbLocationMapsetNode()
         self.RefreshItems()
         self.ExpandCurrentMapset()
+        if self._model.GetLeafCount(self._model.root) <= 50:
+            self.ExpandAll()
 
     def _getNewMapName(self, message, title, value, element, mapset, env):
         """Dialog for simple text entry"""

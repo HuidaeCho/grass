@@ -51,22 +51,6 @@ from lmgr.giface import LayerManagerGrassInterfaceForMapDisplay
 TREE_ITEM_HEIGHT = 25
 
 LMIcons = {
-    'rastImport': MetaIcon(img='layer-import',
-                           label=_('Import raster data')),
-    'rastLink': MetaIcon(img='layer-import',
-                         label=_('Link external raster data')),
-    'rastUnpack': MetaIcon(img='layer-import',
-                           label=_('Unpack GRASS raster map')),
-    'rastOut': MetaIcon(img='layer-export',
-                        label=_('Set raster output format')),
-    'vectImport': MetaIcon(img='layer-import',
-                           label=_('Import vector data')),
-    'vectLink': MetaIcon(img='layer-import',
-                         label=_('Link external vector data')),
-    'vectUnpack': MetaIcon(img='layer-import',
-                           label=_('Unpack GRASS vector map')),
-    'vectOut': MetaIcon(img='layer-export',
-                        label=_('Set vector output format')),
     'wmsImport': MetaIcon(img='layer-wms-add',
                           label=_('Import data from WMS server')),
     'layerCmd': MetaIcon(img='layer-command-add',
@@ -121,7 +105,9 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
                  id=wx.ID_ANY, style=wx.SUNKEN_BORDER,
                  ctstyle=CT.TR_HAS_BUTTONS | CT.TR_HAS_VARIABLE_ROW_HEIGHT |
                  CT.TR_HIDE_ROOT | CT.TR_ROW_LINES | CT.TR_FULL_ROW_HIGHLIGHT |
-                 CT.TR_MULTIPLE, **kwargs):
+                 CT.TR_MULTIPLE,
+                 title=None,
+                 **kwargs):
 
         if 'style' in kwargs:
             ctstyle |= kwargs['style']
@@ -198,11 +184,8 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
                                    style=wx.DEFAULT_FRAME_STYLE,
                                    tree=self, notebook=self.notebook,
                                    lmgr=self.lmgr, page=self.treepg,
-                                   Map=self.Map)
-
-        # here (with initial auto-generated names) we use just the
-        # number, not the whole name for simplicity
-        self.mapdisplay.SetTitleWithName(str(self.displayIndex + 1))
+                                   Map=self.Map,
+                                   title=title)
 
         # show new display
         if showMapDisplay is True:

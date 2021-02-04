@@ -95,9 +95,8 @@ def findBetween(s, first, last):
 class TplotFrame(wx.Frame):
     """The main frame of the application"""
 
-    def __init__(self, parent, giface):
-        wx.Frame.__init__(self, parent, id=wx.ID_ANY,
-                          title=_("GRASS GIS Temporal Plot Tool"))
+    def __init__(self, parent, giface, title=_("Temporal Plot Tool")):
+        wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=title)
 
         tgis.init(True)
         self._giface = giface
@@ -909,8 +908,12 @@ class TplotFrame(wx.Frame):
                     coordx, coordy = self.coorval.GetValue().split(',')
                     coordx, coordy = float(coordx), float(coordy)
                 except (ValueError, AttributeError):
-                    GMessage(message=_("Incorrect coordinates format, should "
-                                       "be: x,y"), parent=self)
+                    GError(
+                        parent=self,
+                        message=_("Incorrect coordinates format, should be: x,y"),
+                        showTraceback=False,
+                    )
+                    return
             coors = [coordx, coordy]
             if coors:
                 try:
