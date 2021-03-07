@@ -44,7 +44,7 @@ import wx
 from core import utils
 from core.giface import StandaloneGrassInterface
 from core.gcmd import RunCommand
-from core.render import Map, MapLayer, Overlay, RenderMapMgr
+from core.render import Map, MapLayer, RenderMapMgr
 from mapdisp.frame import MapFrame
 from core.debug import Debug
 from core.settings import UserSettings
@@ -82,8 +82,8 @@ class DMonMap(Map):
         self.cmdfile = cmdfile
 
         # list of layers for rendering added from cmd file
-        # TODO temporary solution, layer managment by different tools in GRASS
-        # should be resovled
+        # TODO temporary solution, layer management by different tools in GRASS
+        # should be resolved
         self.ownedLayers = []
         self.oldOverlays = []
 
@@ -537,13 +537,13 @@ class MapApp(wx.App):
         # set default properties
         self.mapFrm.SetProperties(render=UserSettings.Get(
             group='display', key='autoRendering', subkey='enabled'),
-                                 mode=UserSettings.Get(
+            mode=UserSettings.Get(
             group='display', key='statusbarMode', subkey='selection'),
-                                 alignExtent=UserSettings.Get(
+            alignExtent=UserSettings.Get(
             group='display', key='alignExtent', subkey='enabled'),
-                                 constrainRes=UserSettings.Get(
+            constrainRes=UserSettings.Get(
             group='display', key='compResolution', subkey='enabled'),
-                                 showCompExtent=UserSettings.Get(
+            showCompExtent=UserSettings.Get(
             group='display', key='showCompExtent', subkey='enabled'))
 
         self.Map.saveToFile.connect(lambda cmd: self.mapFrm.DOutFile(cmd))
@@ -576,7 +576,7 @@ class MapApp(wx.App):
         # the check below disabled, it's too much invasive to call
         # g.gisenv in the watcher...
         # try:
-        # GISBASE and other system enviromental variables can not be used
+        # GISBASE and other system environmental variables can not be used
         # since the process inherited them from GRASS
         # raises exception when vaiable does not exists
         # grass.gisenv()['GISDBASE']

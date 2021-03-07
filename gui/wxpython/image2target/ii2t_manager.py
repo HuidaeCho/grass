@@ -46,10 +46,8 @@ import wx.lib.colourselect as csel
 from core import globalvar
 if globalvar.wxPythonPhoenix:
     from wx import adv as wiz
-    from wx.adv import Wizard
 else:
     from wx import wizard as wiz
-    from wx.wizard import Wizard
 
 import grass.script as grass
 
@@ -1235,7 +1233,7 @@ class GCP(MapFrame, ColumnSorterMixin):
 
         # update key and GCP number
         for newkey in range(key, len(self.mapcoordlist)):
-            index = self.list.FindItemData(-1, newkey + 1)
+            index = self.list.FindItem(-1, newkey + 1)
             self.mapcoordlist[newkey][0] = newkey
             self.list.SetItem(index, 0, str(newkey))
             self.list.SetItemData(index, newkey)
@@ -1512,13 +1510,11 @@ class GCP(MapFrame, ColumnSorterMixin):
 
         if not sourceMapWin:
             GError(parent=self,
-                   message="%s. %s%s" % (_("source mapwin not defined"),
-                                         os.linesep, err))
+                   message=_("source mapwin not defined"))
 
         if not targetMapWin:
             GError(parent=self,
-                   message="%s. %s%s" % (_("target mapwin not defined"),
-                                         os.linesep, err))
+                   message=_("target mapwin not defined"))
 
         try:
             f = open(self.file['control_points'], 'r')
@@ -2409,7 +2405,7 @@ class GCPList(ListCtrl,
 
     def OnColClick(self, event):
         """ListCtrl forgets selected item..."""
-        self.selected = self.FindItemData(-1, self.selectedkey)
+        self.selected = self.FindItem(-1, self.selectedkey)
         self.SetItemState(self.selected,
                           wx.LIST_STATE_SELECTED,
                           wx.LIST_STATE_SELECTED)

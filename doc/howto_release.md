@@ -17,7 +17,7 @@ Check examples if still compiling
 ### Fix typos in source code with
 
 ```bash
-tools/fix_typos.sh
+utils/fix_typos.sh
 ```
 
 ### i18N: sync from Transifex
@@ -29,7 +29,7 @@ master .po files
 
 ```bash
 cd locale
-sh ~/software/grass-addons/tools/transifex_merge.sh
+sh ~/software/grass-addons/utils/transifex_merge.sh
 make
 make verify
 # ... then fix .po files as needed.
@@ -84,7 +84,7 @@ find . -name '*.o'    | xargs rm
 find . -name '*.pyc'  | xargs rm
 find . -name 'OBJ.*'  | xargs rm -r
 find . -name '__pycache__' | xargs rm -r
-rm -f lib/python/ctypes/ctypesgencore/parser/lextab.py
+rm -f python/grass/ctypes/ctypesgencore/parser/lextab.py
 rm -f gui/wxpython/menustrings.py gui/wxpython/build_ext.pyc \
   gui/wxpython/xml/menudata.xml gui/wxpython/xml/module_tree_menudata.xml
 chmod -R a+r *
@@ -179,7 +179,7 @@ md5sum grass-${VERSION}.tar.gz > grass-${VERSION}.md5sum
 Create Changelog file on release branch:
 
 ```bash
-python tools/gitlog2changelog.py
+python utils/gitlog2changelog.py
 mv ChangeLog ChangeLog_$VERSION
 head ChangeLog_$VERSION
 gzip ChangeLog_$VERSION
@@ -365,31 +365,18 @@ Software pages:
     - <https://lists.osgeo.org/mailman/listinfo/grass-announce> | <grass-announce@lists.osgeo.org>
     - <https://lists.osgeo.org/mailman/listinfo/grass-dev> | <grass-dev@lists.osgeo.org>
     - <https://lists.osgeo.org/mailman/listinfo/grass-user> | <grass-user@lists.osgeo.org>
-- DebianGIS: <debian-gis@lists.debian.org> - send only small note
 - FreeGIS: <freegis-list@intevation.de>
 - Geowanking: <geowanking@geowanking.org>
-- OSGeo.org: <news_item@osgeo.org>
-
-Via Email:
-
-- info@osgeo.org
-- <http://www.gis-news.de/>  (franz-josef.behr@gismngt.de)
-- mfeilner@linuxnewmedia.de
-- info@harzer.de
-- editor-geo@geoconnexion.com
+- OSGeo.org: <news_item@osgeo.org>, <info@osgeo.org>
+- Geo Connexion: <editor-geo@geoconnexion.com>
 
 Via Web:
 
 - <http://linuxtoday.com/contribute.php3>
 - <https://joinup.ec.europa.eu/software/grassgis/home> (submit news, MN)
-- <http://www.macnn.com/contact/newstips/1>
-- <http://www10.giscafe.com/submit_material/submit_options.php#Press> (MN) -->
-  Press releases
 - <http://www.directionsmag.com/pressreleases/> (News -> Submit Press Release)
 - <http://directory.fsf.org/wiki/GRASS_%28Geographic_Resources_Analysis_Support_System%29>
 - <https://www.linux-apps.com/p/1128004/edit/> (MN)
-- <https://news.eoportal.org/web/eoportal/share-your-news> (MN) -> Share your
-  news with the EO community
 - <https://www.heise.de/download/product/grass-gis-7105> (update, MN)
 - See also: <https://grass.osgeo.org/wiki/Contact_Databases>
 - ... anywhere else? Please add here.

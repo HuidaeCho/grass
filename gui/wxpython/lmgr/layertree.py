@@ -317,7 +317,7 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
     def GetSelections(self):
         """Returns a list of selected items.
 
-        This method is copied from customtreecontrol and overriden because
+        This method is copied from customtreecontrol and overridden because
         with some version wx (?) multiple selection doesn't work.
         Probably it is caused by another GetSelections method in treemixin.DragAndDrop?
         """
@@ -972,7 +972,7 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
 
         kwargs = {'align': self.GetLayerInfo(selected[0],
                                              key='maplayer').GetName()
-        }
+                  }
 
         if UserSettings.Get(group='general',
                             key='region', subkey=['resAlign', 'enabled']):
@@ -1427,8 +1427,8 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
                     # -> previous sibling of selected layer
                     parent = self.GetItemParent(selectedLayer)
                     layer = self.InsertItem(
-                                parentId=parent, input=self.GetPrevSibling(selectedLayer),
-                                text='', ct_type=1, wnd=ctrl)
+                        parentId=parent, input=self.GetPrevSibling(selectedLayer),
+                        text='', ct_type=1, wnd=ctrl)
             else:  # add first layer to the layer tree (first child of root)
                 layer = self.PrependItem(
                     parent=self.root, text='', ct_type=1, wnd=ctrl)
@@ -1886,7 +1886,7 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
             self.OnDrop(dropTarget, self._dragItem)
 
     def OnDrop(self, dropTarget, dragItem):
-        # save everthing associated with item to drag
+        # save everything associated with item to drag
         try:
             old = dragItem  # make sure this member exists
         except:
@@ -1993,7 +1993,7 @@ class LayerTree(treemixin.DragAndDrop, CT.CustomTreeCtrl):
                 newItem = self.PrependItem(self.root, text=text,
                                            ct_type=1, wnd=newctrl, image=image,
                                            data=data)
-            elif (self.flag &  wx.TREE_HITTEST_BELOW) or (self.flag & wx.TREE_HITTEST_NOWHERE) \
+            elif (self.flag & wx.TREE_HITTEST_BELOW) or (self.flag & wx.TREE_HITTEST_NOWHERE) \
                     or (self.flag & wx.TREE_HITTEST_TOLEFT) or (self.flag & wx.TREE_HITTEST_TORIGHT):
                 newItem = self.AppendItem(self.root, text=text,
                                           ct_type=1, wnd=newctrl, image=image,

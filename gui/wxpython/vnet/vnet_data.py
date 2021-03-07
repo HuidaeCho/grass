@@ -1,7 +1,7 @@
 """
 @package vnet.vnet_data
 
-@brief Vector network analysis classes for data managment.
+@brief Vector network analysis classes for data management.
 
 Classes:
  - vnet_data::VNETData
@@ -23,6 +23,7 @@ This program is free software under the GNU General Public License
 @author Eliska Kyzlikova <eliska.kyzlikova gmail.com> (turn costs support)
 """
 import os
+import math
 import six
 from copy import deepcopy
 
@@ -42,7 +43,7 @@ from vnet.vnet_utils import ParseMapStr, SnapToNode
 from gui_core.gselect import VectorDBInfo
 from grass.pydispatch.signal import Signal
 
-from vnet.vnet_utils import DegreesToRadians, RadiansToDegrees
+from vnet.vnet_utils import DegreesToRadians
 
 
 class VNETData:
@@ -177,11 +178,11 @@ class VNETData:
 
         errLayerStr = ""
         vals = {
-                'arc_layer': _("arc layer"),
-                'node_layer': _("node layer"),
-                'turn_layer': _("turntable layer"),
-                'turn_cat_layer': _("unique categories layer")
-                }
+            'arc_layer': _("arc layer"),
+            'node_layer': _("node layer"),
+            'turn_layer': _("turntable layer"),
+            'turn_cat_layer': _("unique categories layer")
+            }
         for layer, layerLabel in six.iteritems(vals):
 
             if layer in ["turn_layer", "turn_cat_layer"] and not flags["t"]:

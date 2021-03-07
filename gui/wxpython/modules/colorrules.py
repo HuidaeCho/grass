@@ -43,10 +43,9 @@ from gui_core.gselect import Select, LayerSelect, ColumnSelect, VectorDBInfo
 from core.render import Map
 from gui_core.forms import GUI
 from core.debug import Debug as Debug
-from core.settings import UserSettings
 from gui_core.widgets import ColorTablesComboBox
 from gui_core.wrap import SpinCtrl, PseudoDC, TextCtrl, Button, CancelButton, \
-     StaticText, StaticBox, EmptyBitmap, BitmapFromImage
+    StaticText, StaticBox, EmptyBitmap, BitmapFromImage
 
 
 class RulesPanel:
@@ -676,7 +675,7 @@ class ColorTable(wx.Frame):
 
         if os.path.exists(path):
             dlgOw = wx.MessageDialog(
-                parent,
+                self,
                 message=_(
                     "File <%s> already already exists. "
                     "Do you want to overwrite it?") %

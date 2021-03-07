@@ -49,7 +49,7 @@ from startup.guiutils import (
 
 from core.gcmd import RunCommand, GError, GMessage
 from core.settings import UserSettings, GetDisplayVectSettings
-from core.utils import SetAddOnPath, GetLayerNameFromCmd, command2ltype
+from core.utils import SetAddOnPath, GetLayerNameFromCmd, command2ltype, get_shell_pid
 from gui_core.preferences import MapsetAccess, PreferencesDialog
 from lmgr.layertree import LayerTree, LMIcons
 from lmgr.menudata import LayerManagerMenuData, LayerManagerModuleTree
@@ -119,8 +119,10 @@ class GMFrame(wx.Frame):
         self._giface = LayerManagerGrassInterface(self)
 
         menu_errors = []
+
         def add_menu_error(message):
             menu_errors.append(message)
+
         def show_menu_errors(messages):
             if messages:
                 self._gconsole.WriteError(
@@ -1382,7 +1384,7 @@ class GMFrame(wx.Frame):
                       location=gxwXml.location,
                       mapset=gxwXml.mapset,
                       getErrorMsg=True,
-                      )
+                                        )
         if returncode != 0:
             # TODO: use the function from grass.py
             reason = _("Most likely the database, location or mapset"
@@ -1407,7 +1409,7 @@ class GMFrame(wx.Frame):
                 parent=self,
                 message=_("Current location is <%(loc)s>.\n"
                           "Current mapset is <%(mapset)s>.") %
-                          {'loc': gxwXml.location,
+                {'loc': gxwXml.location,
                            'mapset': gxwXml.mapset})
         return True
 
@@ -2137,13 +2139,13 @@ class GMFrame(wx.Frame):
         # set default properties
         mapdisplay.SetProperties(render=UserSettings.Get(
             group='display', key='autoRendering', subkey='enabled'),
-                                 mode=UserSettings.Get(
+            mode=UserSettings.Get(
             group='display', key='statusbarMode', subkey='selection'),
-                                 alignExtent=UserSettings.Get(
+            alignExtent=UserSettings.Get(
             group='display', key='alignExtent', subkey='enabled'),
-                                 constrainRes=UserSettings.Get(
+            constrainRes=UserSettings.Get(
             group='display', key='compResolution', subkey='enabled'),
-                                 showCompExtent=UserSettings.Get(
+            showCompExtent=UserSettings.Get(
             group='display', key='showCompExtent', subkey='enabled'))
 
         self.displayIndex += 1
@@ -2225,7 +2227,7 @@ class GMFrame(wx.Frame):
             self.GetMapDisplay().GetWindow().UpdateMap()
 
     def OnMapCreated(self, name, ltype, add=None):
-        """Decides wheter the map should be added to layer tree."""
+        """Decides whether the map should be added to layer tree."""
         if add is None:
             # add new map into layer if globally enabled
             if UserSettings.Get(group='cmd',
@@ -2567,15 +2569,9 @@ class GMFrame(wx.Frame):
 
     def _quitGRASS(self):
         """Quit GRASS terminal"""
-        try:
-            shellPid = int(grass.gisenv()['PID'])
-        except (KeyError, ValueError) as error:
-            Debug.msg(
-                1,
-                "No PID for GRASS shell (assuming no shell running): {}".format(error)
-            )
+        shellPid = get_shell_pid()
+        if shellPid is None:
             return
-
         Debug.msg(1, "Exiting shell with pid={0}".format(shellPid))
         import signal
         os.kill(shellPid, signal.SIGTERM)

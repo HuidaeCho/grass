@@ -21,17 +21,9 @@ This program is free software under the GNU General Public License
 """
 
 import os
-import sys
 
 import wx
 from core import globalvar
-if globalvar.wxPythonPhoenix:
-    try:
-        import agw.flatnotebook as FN
-    except ImportError: # if it's not there locally, try the wxPython lib.
-        import wx.lib.agw.flatnotebook as FN
-else:
-    import wx.lib.flatnotebook as FN
 import wx.lib.filebrowsebutton as filebrowse
 
 from grass.script import core as grass
@@ -39,7 +31,7 @@ from grass.script import task as gtask
 
 from core.gcmd import GError, GMessage, GWarning, RunCommand
 from gui_core.forms import CmdPanel
-from gui_core.gselect import OgrTypeSelect, GdalSelect, SubGroupSelect
+from gui_core.gselect import GdalSelect
 from gui_core.widgets import GListCtrl, GNotebook, LayersList, \
     LayersListValidator
 from gui_core.wrap import Button, CloseButton, StaticText, StaticBox
@@ -251,7 +243,7 @@ class ImportDialog(wx.Dialog):
         else:
             message = _(
                 "Output map name <%(name)s> exist. "
-                ) % {
+            ) % {
                 'name': layers_list.output_map}
         GError(parent=self, message=message, caption=_("Invalid name"))
 
@@ -284,7 +276,7 @@ class ImportDialog(wx.Dialog):
         if not self.add.IsChecked() or returncode != 0:
             return
 
-        # TODO: if importing map creates more map the folowing does not work
+        # TODO: if importing map creates more map the following does not work
         # * do nothing if map does not exist or
         # * try to determine names using regexp or
         # * persuade import tools to report map names

@@ -35,7 +35,7 @@ import copy
 import wx
 
 from core import utils
-from core.gcmd import GMessage, RunCommand
+from core.gcmd import RunCommand
 from core.settings import UserSettings
 from gui_core.wrap import StaticText, TextCtrl
 
@@ -953,7 +953,7 @@ class SbCoordinates(SbTextItem):
         """Show the last map window coordinates.
 
         .. todo::
-            remove last EN call and use coordinates comming from signal
+            remove last EN call and use coordinates coming from signal
         """
         precision = int(UserSettings.Get(group='projection', key='format',
                                          subkey='precision'))

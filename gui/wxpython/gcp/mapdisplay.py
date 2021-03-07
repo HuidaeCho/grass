@@ -16,7 +16,6 @@ This program is free software under the GNU General Public License
 """
 
 import os
-import math
 import platform
 
 from core import globalvar
@@ -30,7 +29,6 @@ from core.gcmd import GMessage
 from gui_core.dialogs import GetImageHandlers, ImageSizeDialog
 from gui_core.mapdisp import SingleMapFrame
 from gui_core.wrap import Menu
-from core.settings import UserSettings
 from mapwin.buffered import BufferedMapWindow
 from mapwin.base import MapWindowProperties
 
@@ -232,7 +230,7 @@ class MapFrame(SingleMapFrame):
         self.statusbarManager.Update()
 
     def _setUpMapWindow(self, mapWindow):
-        # TODO: almost the smae implementation as for MapFrameBase (only names differ)
+        # TODO: almost the same implementation as for MapFrameBase (only names differ)
         # enable or disable zoom history tool
         mapWindow.zoomHistoryAvailable.connect(
             lambda:

@@ -16,10 +16,10 @@ This program is free software under the GNU General Public License
 """
 
 import os
-import sys
 import six
 
 import wx
+from random import randint
 
 import wx.lib.plot as plot
 from core.globalvar import ICONDIR

@@ -61,7 +61,6 @@ else:
     import queue as Queue
     unicode = str
 
-import re
 import codecs
 
 from threading import Thread
@@ -102,7 +101,10 @@ from gui_core import gselect
 from core import gcmd
 from core import utils
 from core.settings import UserSettings
-from gui_core.widgets import FloatValidator, GNotebook, FormNotebook, FormListbook
+from gui_core.widgets import (
+    FloatValidator, FormListbook, FormNotebook, GNotebook,
+    PlacementValidator,
+)
 from core.giface import Notification, StandaloneGrassInterface
 from gui_core.widgets import LayersList
 from gui_core.wrap import BitmapFromImage, Button, CloseButton, StaticText, \
@@ -503,7 +505,7 @@ class TaskFrame(wx.Frame):
 
         guisizer = wx.BoxSizer(wx.VERTICAL)
 
-        # set apropriate output window
+        # set appropriate output window
         if self.parent:
             self.standalone = False
         else:
@@ -717,10 +719,10 @@ class TaskFrame(wx.Frame):
             scale = 0.50
         self.SetSize(
             wx.Size(
-                sizeFrame[0],
-                sizeFrame[1] + scale * max(
+                round(sizeFrame[0]),
+                round(sizeFrame[1] + scale * max(
                     self.notebookpanel.panelMinHeight,
-                    self.notebookpanel.constrained_size[1])))
+                    self.notebookpanel.constrained_size[1]))))
 
         # thread to update dialog
         # create queues
@@ -1237,9 +1239,16 @@ class CmdPanel(wx.Panel):
                                 max=maxValue)
                             style = wx.BOTTOM | wx.LEFT
                         else:
-                            txt2 = TextCtrl(
-                                parent=which_panel, value=p.get(
-                                    'default', ''))
+                            if p['name'] in ('at'):
+                                txt2 = TextCtrl(
+                                    parent=which_panel, value=p.get(
+                                        'default', ''),
+                                    validator=PlacementValidator(
+                                        num_of_params=len(p['key_desc'])))
+                            else:
+                                txt2 = TextCtrl(
+                                    parent=which_panel, value=p.get(
+                                        'default', ''))
                             style = wx.EXPAND | wx.BOTTOM | wx.LEFT
 
                         value = self._getValue(p)
@@ -1314,9 +1323,16 @@ class CmdPanel(wx.Panel):
                 if p.get('multiple', False) or \
                         p.get('type', 'string') == 'string' or \
                         len(p.get('key_desc', [])) > 1:
-                    win = TextCtrl(
-                        parent=which_panel, value=p.get(
-                            'default', ''))
+                    if p['name'] in ('at'):
+                        win = TextCtrl(
+                            parent=which_panel, value=p.get(
+                                'default', ''),
+                            validator=PlacementValidator(
+                                num_of_params=len(p['key_desc'])))
+                    else:
+                        win = TextCtrl(
+                            parent=which_panel, value=p.get(
+                                'default', ''))
 
                     value = self._getValue(p)
                     if value:

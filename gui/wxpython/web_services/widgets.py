@@ -40,7 +40,7 @@ else:
 import wx.lib.colourselect as csel
 
 from core.debug import Debug
-from core.gcmd import GWarning, GMessage
+from core.gcmd import GMessage
 from core.gconsole import CmdThread, GStderr, EVT_CMD_DONE, EVT_CMD_OUTPUT
 
 from web_services.cap_interface import WMSCapabilities, WMTSCapabilities, OnEarthCapabilities
@@ -527,7 +527,7 @@ class WSPanel(wx.Panel):
         self.ws_cmdl = self.ws_drvs[self.ws]['cmd'] + conn_cmd
 
     def OnCapDownloadDone(self, event):
-        """Process donwloaded capabilities file and emits capParsed
+        """Process downloaded capabilities file and emits capParsed
         signal (see class constructor).
         """
         if event.pid != self.currentPid:

@@ -26,9 +26,10 @@ DATE := $(shell date '+%d_%m_%Y')
 
 DIRS = \
 	demolocation \
-	tools \
+	utils \
 	include \
 	lib \
+	python \
 	db \
 	display \
 	general \
@@ -97,7 +98,7 @@ LIBDIRS = \
 	lib/db \
 	lib/vector \
 	db/drivers \
-	lib/python
+	python
 
 # Compile libraries only
 libs:

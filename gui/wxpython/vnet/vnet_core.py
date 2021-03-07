@@ -19,7 +19,7 @@ This program is free software under the GNU General Public License
 @author Eliska Kyzlikova <eliska.kyzlikova gmail.com> (turn costs support)
 """
 
-import os
+import math
 import six
 from grass.script.utils import try_remove
 from grass.script import core as grass
@@ -27,7 +27,6 @@ from grass.script.task import cmdlist_to_tuple
 
 import wx
 
-from core import utils
 from core.gcmd import RunCommand, GMessage
 from core.gconsole import CmdThread, EVT_CMD_DONE, GConsole
 
@@ -597,7 +596,7 @@ class VNETAnalyses:
 
         sqlFile_f.close()
 
-        # TODO imporve parser and run in thread
+        # TODO improve parser and run in thread
 
         ret, msg, err = RunCommand('db.execute',
                                    getErrorMsg=True,

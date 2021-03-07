@@ -29,7 +29,6 @@ This program is free software under the GNU General Public License
 """
 
 import os
-import sys
 import re
 import six
 
@@ -44,10 +43,11 @@ from core import globalvar
 from core.gcmd import GError, RunCommand, GMessage
 from gui_core.gselect import LocationSelect, MapsetSelect, Select, \
     OgrTypeSelect, SubGroupSelect
-from gui_core.widgets import SingleSymbolPanel, GListCtrl, SimpleValidator, \
+from gui_core.widgets import SingleSymbolPanel, SimpleValidator, \
     MapValidator
 from core.settings import UserSettings
 from core.debug import Debug
+from core.utils import is_shell_running
 from gui_core.wrap import Button, CheckListBox, EmptyBitmap, HyperlinkCtrl, \
     Menu, NewId, SpinCtrl, StaticBox, StaticText, TextCtrl
 
@@ -1284,7 +1284,7 @@ class GroupDialog(wx.Dialog):
                           read=True, flags='sg').splitlines()
 
     def ShowResult(self, group, returnCode, create):
-        """Show if operation was successfull."""
+        """Show if operation was successful."""
         group += '@' + grass.gisenv()['MAPSET']
         if returnCode is None:
             label = _("No changes to apply in group <%s>.") % group
@@ -1713,7 +1713,7 @@ class MapLayersDialogForGroups(MapLayersDialogBase):
         return [_('raster'), ]
 
     def _selectAll(self):
-        """Could be overriden"""
+        """Could be overridden"""
         return False
 
     def _fullyQualifiedNames(self):
@@ -2357,18 +2357,27 @@ class QuitDialog(wx.Dialog):
                 wx.ART_QUESTION,
                 client=wx.ART_MESSAGE_BOX))
 
-        self.informLabel = StaticText(
-            parent=self.panel, id=wx.ID_ANY, label=_(
-                "Do you want to quit GRASS including shell "
-                "prompt or just close the GUI?"))
+        self._shell_running = is_shell_running()
+
+        if self._shell_running:
+            text = _(
+                "Do you want to quit GRASS GIS including shell "
+                "or just close the GUI?"
+            )
+        else:
+            text = _(
+                "Do you want to quit GRASS GIS?"
+            )
+        self.informLabel = StaticText(parent=self.panel, id=wx.ID_ANY, label=text)
         self.btnCancel = Button(parent=self.panel, id=wx.ID_CANCEL)
-        self.btnClose = Button(parent=self.panel, id=wx.ID_NO,
-                                  label=_("Close GUI"))
-        self.btnClose.SetFocus()
+        if self._shell_running:
+            self.btnClose = Button(
+                parent=self.panel, id=wx.ID_NO, label=_("Close GUI")
+            )
+            self.btnClose.Bind(wx.EVT_BUTTON, self.OnClose)
         self.btnQuit = Button(parent=self.panel, id=wx.ID_YES,
                                  label=_("Quit GRASS GIS"))
-
-        self.btnClose.Bind(wx.EVT_BUTTON, self.OnClose)
+        self.btnQuit.SetFocus()
         self.btnQuit.Bind(wx.EVT_BUTTON, self.OnQuit)
 
         self.__layout()
@@ -2379,7 +2388,8 @@ class QuitDialog(wx.Dialog):
 
         btnSizer = wx.BoxSizer(wx.HORIZONTAL)
         btnSizer.Add(self.btnCancel, flag=wx.RIGHT, border=5)
-        btnSizer.Add(self.btnClose, flag=wx.RIGHT, border=5)
+        if self._shell_running:
+            btnSizer.Add(self.btnClose, flag=wx.RIGHT, border=5)
         btnSizer.Add(self.btnQuit, flag=wx.RIGHT, border=5)
 
         bodySizer = wx.BoxSizer(wx.HORIZONTAL)

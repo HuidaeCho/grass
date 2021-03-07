@@ -26,7 +26,7 @@ import wx
 import tempfile
 from multiprocessing import Process, Queue
 
-from core.gcmd import RunCommand, GException, DecodeString
+from core.gcmd import GException, DecodeString
 from core.settings import UserSettings
 from core.debug import Debug
 from core.utils import autoCropImageFromFile
@@ -315,7 +315,7 @@ class BitmapProvider:
 
 
 class BitmapRenderer:
-    """Class which renderes 2D and 3D images to files."""
+    """Class which renders 2D and 3D images to files."""
 
     def __init__(self, mapFilesPool, tempDir,
                  imageWidth, imageHeight):

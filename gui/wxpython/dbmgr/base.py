@@ -259,7 +259,7 @@ class VirtualAttributeList(ListCtrl,
                 self.InsertColumnInfo(i, info)
             i += 1
             if i >= 256:
-                    self.log.write(_("Can display only 256 columns."))
+                self.log.write(_("Can display only 256 columns."))
 
         i = 0
         outFile.seek(0)
@@ -595,7 +595,8 @@ class VirtualAttributeList(ListCtrl,
                    map=self.mapDBInfo.map,
                    layer=self.layer,
                    option=option,
-                   columns=self.GetColumn(self._col).GetText())
+                   columns=self.GetColumn(self._col).GetText(),
+                   overwrite=True)
 
         self.LoadData(self.layer)
 
@@ -2012,6 +2013,8 @@ class DbMgrBrowsePage(DbMgrNotebookBase):
 
     def OnApplySqlStatement(self, event):
         """Apply simple/advanced sql statement"""
+        if not self.layerPage:
+            return
         keyColumn = -1  # index of key column
         listWin = self.FindWindowById(self.layerPage[self.selLayer]['data'])
         sql = None
@@ -3635,7 +3638,8 @@ class LayerBook(wx.Notebook):
                        layer=layer,
                        qlayer=layer,
                        option='cat',
-                       columns=key)
+                       columns=key,
+                       overwrite=True)
 
         if ret == 0:
             # update dialog (only for new layer)
@@ -3729,7 +3733,11 @@ class LayerBook(wx.Notebook):
     def OnModifyLayer(self, event):
         """Modify layer connection settings"""
 
-        layer = int(self.modifyLayerWidgets['layer'][1].GetStringSelection())
+        layer = self.modifyLayerWidgets['layer'][1].GetStringSelection()
+        if not layer:
+            return
+
+        layer = int(layer)
 
         modify = False
         if self.modifyLayerWidgets['driver'][1].GetStringSelection() != \

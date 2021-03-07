@@ -26,7 +26,6 @@ from core import globalvar
 from core.gcmd import GError, RunCommand
 from core.giface import StandaloneGrassInterface
 from gui_core.gselect import Select
-from gui_core.forms import GUI
 from gui_core.widgets import IntegerValidator
 from gui_core.wrap import Button, ClearButton, CloseButton, TextCtrl, \
     StaticText, StaticBox
@@ -262,7 +261,7 @@ class MapCalcFrame(wx.Frame):
         self.newmaptxt = Select(
             parent=self.panel, id=wx.ID_ANY, size=(
                 250, -1), type=element, multiple=False,
-                fullyQualified=False)
+            fullyQualified=False)
         self.mapsellabel = StaticText(parent=self.panel, id=wx.ID_ANY)
         if self.rast3d:
             self.mapsellabel.SetLabel(_('Insert existing 3D raster map'))
@@ -549,7 +548,7 @@ class MapCalcFrame(wx.Frame):
 
     # unused
     # def OnSelectTextEvt(self, event):
-    #     """Checks if user is typing or the event was emited by map selection.
+    #     """Checks if user is typing or the event was emitted by map selection.
     #     Prevents from changing focus.
     #     """
     #     item = self.mapselect.GetValue().strip()
@@ -627,16 +626,16 @@ class MapCalcFrame(wx.Frame):
             pass
 
         newmcalcstr += what
-        
+
         # Do not add extra space if there is already one
         try:
             if newmcalcstr[-1] != ' ' and mcalcstr[position] != ' ':
                 newmcalcstr += ' '
         except:
             newmcalcstr += ' '
-        
+
         newmcalcstr += mcalcstr[position:]
-        
+
         self.text_mcalc.SetValue(newmcalcstr)
         if len(what) > 0:
             match = re.search(pattern="\(.*\)", string=what)

@@ -27,7 +27,6 @@ from core.debug import Debug
 from core.settings import UserSettings
 from core.gcmd import GError, RunCommand
 from icons.icon import MetaIcon
-from iclass.digit import IClassVDigit
 from core.giface import Notification
 
 
@@ -821,8 +820,8 @@ class VDigitToolbar(BaseToolbar):
                 # add layer to map layer tree/map display
                 mapName = dlg.GetName() + '@' + grass.gisenv()['MAPSET']
                 self._giface.GetLayerList().AddLayer(
-                        ltype='vector', name=mapName, checked=True,
-                        cmd=['d.vect', 'map=%s' % mapName])
+                    ltype='vector', name=mapName, checked=True,
+                    cmd=['d.vect', 'map=%s' % mapName])
 
                 vectLayers = self.UpdateListOfLayers(updateTool=True)
                 selection = vectLayers.index(mapName)

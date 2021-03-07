@@ -40,16 +40,12 @@ import grass.script as grass
 
 from core import utils, globalvar
 from core.render import Map
-from gui_core.gselect import Select, LocationSelect, MapsetSelect
-from gui_core.dialogs import GroupDialog
+from gui_core.gselect import Select
 from core.gcmd import RunCommand, GMessage, GError, GWarning
 from core.settings import UserSettings
 from photo2image.ip2i_mapdisplay import MapFrame
-from core.giface import Notification
 from gui_core.wrap import SpinCtrl, Button, StaticText, StaticBox, \
     TextCtrl, Menu, ListCtrl, BitmapFromImage, CheckListCtrlMixin
-
-from location_wizard.wizard import GridBagSizerTitledPage as TitledPage
 
 #
 # global variables
@@ -391,7 +387,7 @@ class GCP(MapFrame, ColumnSorterMixin):
             fc_count=0
             for line in fc:
                 fc_count+=1
-                if fc_count > storeLine :
+                if fc_count > storeLine:
                     dataFiducialX.append(line.split()[1])
                     dataFiducialY.append(line.split()[2])
 
@@ -618,7 +614,7 @@ class GCP(MapFrame, ColumnSorterMixin):
 
         # update key and GCP number
         for newkey in range(key, len(self.mapcoordlist)):
-            index = self.list.FindItemData(-1, newkey + 1)
+            index = self.list.FindItem(-1, newkey + 1)
             self.mapcoordlist[newkey][0] = newkey
             self.list.SetItem(index, 0, str(newkey))
             self.list.SetItemData(index, newkey)
@@ -865,13 +861,11 @@ class GCP(MapFrame, ColumnSorterMixin):
 
         if not sourceMapWin:
             GError(parent=self,
-                   message="%s. %s%s" % (_("source mapwin not defined"),
-                                         os.linesep, err))
+                   message=_("source mapwin not defined"))
 
         if not targetMapWin:
             GError(parent=self,
-                   message="%s. %s%s" % (_("target mapwin not defined"),
-                                         os.linesep, err))
+                   message=_("target mapwin not defined"))
 
         try:
             f = open(self.file['points'], 'r')
@@ -1717,7 +1711,7 @@ class GCPList(ListCtrl,
 
     def OnColClick(self, event):
         """ListCtrl forgets selected item..."""
-        self.selected = self.FindItemData(-1, self.selectedkey)
+        self.selected = self.FindItem(-1, self.selectedkey)
         self.SetItemState(self.selected,
                           wx.LIST_STATE_SELECTED,
                           wx.LIST_STATE_SELECTED)

@@ -41,6 +41,8 @@ from grass.grassdb.manage import (
     rename_mapset,
     rename_location,
 )
+from grass.script.core import create_environment
+from grass.script.utils import try_remove
 
 from core import globalvar
 from core.gcmd import GError, GMessage, DecodeString, RunCommand
@@ -209,7 +211,7 @@ def create_location_interactively(guiparent, grassdb):
 
     if gWizard.georeffile:
         message = _(
-            "Do you want to import {}"
+            "Do you want to import {} "
             "to the newly created location?"
         ).format(gWizard.georeffile)
         dlg = wx.MessageDialog(parent=guiparent,
@@ -219,7 +221,11 @@ def create_location_interactively(guiparent, grassdb):
                                wx.ICON_QUESTION)
         dlg.CenterOnParent()
         if dlg.ShowModal() == wx.ID_YES:
-            import_file(guiparent, gWizard.georeffile)
+            gisrc_file, env = create_environment(gWizard.grassdatabase,
+                                                 gWizard.location,
+                                                 'PERMANENT')
+            import_file(guiparent, gWizard.georeffile, env)
+            try_remove(gisrc_file)
         dlg.Destroy()
 
     if gWizard.default_region:
@@ -392,7 +398,7 @@ def delete_mapsets_interactively(guiparent, mapsets):
     Exceptions during deletation are handled in get_reasons_mapsets_not_removable
     function.
 
-    Returns True if there was a change, i.e., all mapsets were successfuly
+    Returns True if there was a change, i.e., all mapsets were successfully
     deleted or at least one mapset was deleted.
     Returns False if one or more mapsets cannot be deleted (see reasons given
     by get_reasons_mapsets_not_removable function) or if an error was
@@ -477,7 +483,7 @@ def delete_locations_interactively(guiparent, locations):
     Exceptions during deletation are handled in get_reasons_locations_not_removable
     function.
 
-    Returns True if there was a change, i.e., all locations were successfuly
+    Returns True if there was a change, i.e., all locations were successfully
     deleted or at least one location was deleted.
     Returns False if one or more locations cannot be deleted (see reasons given
     by get_reasons_locations_not_removable function) or if an error was
@@ -663,27 +669,31 @@ def can_switch_mapset_interactive(guiparent, grassdb, location, mapset):
     return can_switch
 
 
-def import_file(guiparent, filePath):
+def import_file(guiparent, filePath, env):
     """Tries to import file as vector or raster.
 
-    If successfull sets default region from imported map.
+    If successful sets default region from imported map.
     """
-    RunCommand('db.connect', flags='c')
+    RunCommand('db.connect', flags='c', env=env)
     mapName = os.path.splitext(os.path.basename(filePath))[0]
     vectors = RunCommand('v.in.ogr', input=filePath, flags='l',
-                         read=True)
+                         read=True, env=env)
 
     wx.BeginBusyCursor()
     wx.GetApp().Yield()
     if vectors:
         # vector detected
         returncode, error = RunCommand(
-            'v.in.ogr', input=filePath, output=mapName, flags='e',
-            getErrorMsg=True)
+            'v.in.ogr', input=filePath, output=mapName,
+            getErrorMsg=True, env=env)
+        if returncode == 0:
+            RunCommand('g.region', flags='s', vector=mapName, env=env)
     else:
         returncode, error = RunCommand(
-            'r.in.gdal', input=filePath, output=mapName, flags='e',
-            getErrorMsg=True)
+            'r.in.gdal', input=filePath, output=mapName,
+            getErrorMsg=True, env=env)
+        if returncode == 0:
+            RunCommand('g.region', flags='s', raster=mapName, env=env)
     wx.EndBusyCursor()
 
     if returncode != 0:

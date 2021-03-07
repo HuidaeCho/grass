@@ -25,9 +25,11 @@ from copy import copy, deepcopy
 
 import wx
 from wx.lib.mixins.listctrl import ColumnSorterMixin, \
-    ListCtrlAutoWidthMixin, TextEditMixin
+    ListCtrlAutoWidthMixin
 
 from core import globalvar
+from core.gcmd import GError
+from gui_core.widgets import FloatValidator, IntegerValidator
 from gui_core.wrap import (
     BitmapFromImage, Button, ComboBox, ListCtrl, Panel, StaticBox,
     StaticText, TextCtrl, CheckListCtrlMixin
@@ -301,7 +303,7 @@ class PointsList(ListCtrl,
 
         # update key and point number
         for newkey in range(key, len(self.itemDataMap)):
-            index = self.FindItemData(-1, newkey + 1)
+            index = self.FindItem(-1, newkey + 1)
             self.itemDataMap[newkey][0] = newkey
             self.SetItem(index, 0, str(newkey + 1))
             self.SetItemData(index, newkey)
@@ -416,7 +418,7 @@ class PointsList(ListCtrl,
 
     def OnColClick(self, event):
         """ListCtrl forgets selected item..."""
-        self.selected = self.FindItemData(-1, self.selectedkey)
+        self.selected = self.FindItem(-1, self.selectedkey)
         self.SetItemState(self.selected,
                           wx.LIST_STATE_SELECTED,
                           wx.LIST_STATE_SELECTED)

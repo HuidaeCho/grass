@@ -33,7 +33,7 @@ from core.menutree import TreeModel, ModuleNode
 from gui_core.widgets import GListCtrl
 from gui_core.treeview import CTreeView
 from core.toolboxes import toolboxesOutdated
-from gui_core.wrap import Button, StaticBox, TextCtrl, Menu, NewId, SearchCtrl
+from gui_core.wrap import Button, StaticBox, Menu, NewId, SearchCtrl
 
 
 class InstallExtensionWindow(wx.Frame):
@@ -192,7 +192,7 @@ class InstallExtensionWindow(wx.Frame):
                 else:
                     flags.append('--%s' % key)
 
-        # 'url=' + self.repo.GetValue().strip()]                    
+        # 'url=' + self.repo.GetValue().strip()]
         return ['g.extension'] + flags + ['extension={}'.format(name) ]
 
     def OnFetch(self, event):
@@ -301,7 +301,7 @@ class ExtensionTreeModelBuilder:
         for prefix in ('display', 'database',
                        'general', 'imagery',
                        'misc', 'postscript', 'paint',
-                       'raster', 'raster3D', 'sites', 'temporal', 'vector', 'wxGUI',  'other'):
+                       'raster', 'raster3D', 'sites', 'temporal', 'vector', 'wxGUI', 'other'):
             node = self.model.AppendNode(parent=self.model.root, label=prefix)
             self.mainNodes[prefix] = node
 

@@ -41,10 +41,8 @@ import wx.lib.colourselect as csel
 from core import globalvar
 if globalvar.wxPythonPhoenix:
     from wx import adv as wiz
-    from wx.adv import Wizard
 else:
     from wx import wizard as wiz
-    from wx.wizard import Wizard
 
 import grass.script as grass
 
@@ -973,7 +971,7 @@ class DispMapPage(TitledPage):
         for layer in self.parent._giface.GetLayerList():
             if layer.type in ltype:
                 layers[str(layer)] = {
-                    'type' : layer.type,
+                    'type': layer.type,
                     'cmd': layer.cmd
                 }
         if name:
@@ -1269,7 +1267,7 @@ class GCP(MapFrame, ColumnSorterMixin):
 
         # update key and GCP number
         for newkey in range(key, len(self.mapcoordlist)):
-            index = self.list.FindItemData(-1, newkey + 1)
+            index = self.list.FindItem(-1, newkey + 1)
             self.mapcoordlist[newkey][0] = newkey
             self.list.SetItem(index, 0, str(newkey))
             self.list.SetItemData(index, newkey)
@@ -1519,13 +1517,11 @@ class GCP(MapFrame, ColumnSorterMixin):
 
         if not sourceMapWin:
             GError(parent=self,
-                   message="%s. %s%s" % (_("source mapwin not defined"),
-                                         os.linesep, err))
+                   message=_("source mapwin not defined"))
 
         if not targetMapWin:
             GError(parent=self,
-                   message="%s. %s%s" % (_("target mapwin not defined"),
-                                         os.linesep, err))
+                   message=_("target mapwin not defined"))
 
         try:
             f = open(self.file['points'], 'r')
@@ -2488,7 +2484,7 @@ class GCPList(ListCtrl,
 
     def OnColClick(self, event):
         """ListCtrl forgets selected item..."""
-        self.selected = self.FindItemData(-1, self.selectedkey)
+        self.selected = self.FindItem(-1, self.selectedkey)
         self.SetItemState(self.selected,
                           wx.LIST_STATE_SELECTED,
                           wx.LIST_STATE_SELECTED)
@@ -2833,10 +2829,10 @@ class GrSettingsDialog(wx.Dialog):
             parent=panel, id=wx.ID_ANY,
             label=_("Highlight RMS error > M + SD * factor:"))
         rmslabel.SetToolTip(
-                _(
-                    "Highlight GCPs with an RMS error larger than \n"
-                    "mean + standard deviation * given factor. \n"
-                    "Recommended values for this factor are between 1 and 2."))
+            _(
+                "Highlight GCPs with an RMS error larger than \n"
+                "mean + standard deviation * given factor. \n"
+                "Recommended values for this factor are between 1 and 2."))
         rmsgridSizer.Add(
             rmslabel,
             flag=wx.ALIGN_CENTER_VERTICAL,

@@ -46,7 +46,6 @@ from __future__ import print_function
 import os
 import sys
 import glob
-import copy
 import six
 
 import wx
@@ -63,7 +62,7 @@ from grass.exceptions import CalledModuleError
 
 from gui_core.widgets import ManageSettingsWidget, CoordinatesValidator
 
-from core.gcmd import RunCommand, GError, GMessage, GWarning, GException
+from core.gcmd import RunCommand, GMessage, GWarning, GException
 from core.utils    import GetListOfLocations, GetListOfMapsets, \
     GetFormats, rasterFormatExtension, vectorFormatExtension
 from core.utils import GetSettingsPath, GetValidLayerName, ListSortLower
@@ -888,7 +887,7 @@ class VectorDBInfo:
         return self.layers[layer]['table']
 
     def GetDbSettings(self, layer):
-        """Get database settins
+        """Get database settings
 
         :param layer: layer number
 
@@ -1859,14 +1858,14 @@ class GdalSelect(wx.Panel):
         self._sourceType = sourceType
         self.changingSizer.Show(
             self.filePanel, show=(
-            sourceType == 'file'))
+                sourceType == 'file'))
         self.changingSizer.Show(
             self.nativePanel, show=(
-            sourceType == 'native'))
+                sourceType == 'native'))
         self.changingSizer.Show(self.dirPanel, show=(sourceType == 'dir'))
         self.changingSizer.Show(
             self.protocolPanel, show=(
-            sourceType == 'pro'))
+                sourceType == 'pro'))
         self.changingSizer.Show(self.dbPanel, show=(sourceType == 'db'))
 
         self.changingSizer.Layout()

@@ -23,7 +23,6 @@ This program is free software under the GNU General Public License
 """
 
 import os
-import sys
 import copy
 
 from core import globalvar
@@ -1431,7 +1430,7 @@ class MapFrame(SingleMapFrame):
 
     def SetProperties(self, render=False, mode=0, showCompExtent=False,
                       constrainRes=False, projection=False, alignExtent=True):
-        """Set properies of map display window"""
+        """Set properties of map display window"""
         self.mapWindowProperties.autoRender = render
         if self.statusbarManager:
             self.statusbarManager.SetMode(mode)

@@ -18,13 +18,12 @@ This program is free software under the GNU General Public License
 @author Anna Kratochvilova <kratochanna gmail.com>
 """
 
-import os
-
 import wx
 
 from grass.pydispatch.signal import Signal
 try:
-    from PIL import Image
+    from PIL import Image  # noqa: F401
+
     hasPIL = True
 except ImportError:
     hasPIL = False
@@ -271,7 +270,7 @@ class LegendController(OverlayController):
         self._cmd = ['d.legend', self._defaultAt]
 
     def SetCmd(self, cmd):
-        """Overriden method
+        """Overridden method
 
         Required for setting default or actual raster legend position.
         """

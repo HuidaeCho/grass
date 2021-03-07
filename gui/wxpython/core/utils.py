@@ -23,7 +23,6 @@ import six
 
 from grass.script import core as grass
 from grass.script import task as gtask
-from grass.exceptions import OpenError
 
 from core.gcmd import RunCommand
 from core.debug import Debug
@@ -633,7 +632,7 @@ def GetColorTables():
 
 
 def _getGDALFormats():
-    """Get dictionary of avaialble GDAL drivers"""
+    """Get dictionary of available GDAL drivers"""
     try:
         ret = grass.read_command('r.in.gdal',
                                  quiet=True,
@@ -645,7 +644,7 @@ def _getGDALFormats():
 
 
 def _getOGRFormats():
-    """Get dictionary of avaialble OGR drivers"""
+    """Get dictionary of available OGR drivers"""
     try:
         ret = grass.read_command('v.in.ogr',
                                  quiet=True,
@@ -1175,6 +1174,27 @@ def unregisterPid(pid):
             'g.gisenv',
             set='GUI_PID={0}'.format(
                 ','.join(guiPid)))
+
+
+def get_shell_pid(env=None):
+    """Get shell PID from the GIS environment or None"""
+    try:
+        shell_pid = int(grass.gisenv(env=env)['PID'])
+        return shell_pid
+    except (KeyError, ValueError) as error:
+        Debug.msg(
+            1,
+            "No PID for GRASS shell (assuming no shell running): {}".format(error)
+        )
+        return None
+
+
+def is_shell_running():
+    """Return True if a separate shell is registered in the GIS environment"""
+    if get_shell_pid() is None:
+        return False
+    return True
+
 
 if __name__ == '__main__':
     sys.exit(doc_test())

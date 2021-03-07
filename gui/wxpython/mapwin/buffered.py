@@ -27,7 +27,6 @@ import os
 import time
 import math
 import sys
-from copy import copy
 
 import wx
 
@@ -39,11 +38,10 @@ import grass.script as grass
 from gui_core.dialogs import SavedRegion
 from gui_core.wrap import DragImage, PseudoDC, EmptyBitmap, BitmapFromImage, \
     Window, Menu, Rect, NewId
-from core.gcmd import RunCommand, GException, GError, GMessage
+from core.gcmd import RunCommand, GException, GError
 from core.debug import Debug
 from core.settings import UserSettings
 from mapwin.base import MapWindowBase
-from core.utils import GetGEventAttribsForHandler
 import core.utils as utils
 from mapwin.graphics import GraphicsSet
 from core.gthread import gThread
@@ -80,7 +78,11 @@ class BufferedMapWindow(MapWindowBase, Window):
         """
         MapWindowBase.__init__(self, parent=parent, giface=giface, Map=Map)
         wx.Window.__init__(self, parent=parent, id=id, style=style, **kwargs)
-        self.SetBackgroundColour("white")
+        # This is applied when no layers are rendered and thus the background
+        # color is not applied in rendering itself (it would be applied always
+        # if rendering would use transparent background).
+        self.SetBackgroundColour(wx.Colour(*UserSettings.Get(
+            group='display', key='bgcolor', subkey='color')))
 
         self._properties = properties
         # this class should not ask for digit, this is a hack

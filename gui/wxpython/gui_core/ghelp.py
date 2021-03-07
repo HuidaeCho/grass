@@ -24,12 +24,6 @@ import re
 import textwrap
 import sys
 import six
-
-if sys.version_info.major == 2:
-    _unichr = unichr
-else:
-    _unichr = chr
-
 import wx
 from wx.html import HtmlWindow
 try:
@@ -44,6 +38,7 @@ except ImportError:
     from wx import AboutBox
 
 import grass.script as grass
+from grass.exceptions import CalledModuleError
 
 # needed just for testing
 if __name__ == '__main__':
@@ -262,7 +257,7 @@ class AboutWindow(wx.Frame):
         copyrightwin = ScrolledPanel(self.aboutNotebook)
         copyrighttxt = TextCtrl(
             copyrightwin, id=wx.ID_ANY, value=copytext,
-        style=wx.TE_MULTILINE | wx.TE_READONLY)
+            style=wx.TE_MULTILINE | wx.TE_READONLY)
         copyrightwin.SetAutoLayout(True)
         copyrightwin.sizer = wx.BoxSizer(wx.VERTICAL)
         copyrightwin.sizer.Add(copyrighttxt, proportion=1,
@@ -286,7 +281,7 @@ class AboutWindow(wx.Frame):
         licensewin = ScrolledPanel(self.aboutNotebook)
         licensetxt = TextCtrl(
             licensewin, id=wx.ID_ANY, value=license,
-        style=wx.TE_MULTILINE | wx.TE_READONLY)
+            style=wx.TE_MULTILINE | wx.TE_READONLY)
         licensewin.SetAutoLayout(True)
         licensewin.sizer = wx.BoxSizer(wx.VERTICAL)
         licensewin.sizer.Add(licensetxt, proportion=1,
@@ -312,7 +307,7 @@ class AboutWindow(wx.Frame):
         window = ScrolledPanel(self.aboutNotebook)
         stat_text = TextCtrl(
             window, id=wx.ID_ANY, value=text,
-        style=wx.TE_MULTILINE | wx.TE_READONLY)
+            style=wx.TE_MULTILINE | wx.TE_READONLY)
         window.SetAutoLayout(True)
         window.sizer = wx.BoxSizer(wx.VERTICAL)
         window.sizer.Add(stat_text, proportion=1,
@@ -335,7 +330,7 @@ class AboutWindow(wx.Frame):
         authorwin = ScrolledPanel(self.aboutNotebook)
         authortxt = TextCtrl(
             authorwin, id=wx.ID_ANY, value=authors,
-        style=wx.TE_MULTILINE | wx.TE_READONLY)
+            style=wx.TE_MULTILINE | wx.TE_READONLY)
         authorwin.SetAutoLayout(True)
         authorwin.SetupScrolling()
         authorwin.sizer = wx.BoxSizer(wx.VERTICAL)
@@ -924,7 +919,7 @@ def _grassDevTeam(start):
         end = date.today().year
 
     return '%(c)s %(start)s-%(end)s by the GRASS Development Team' % {
-        'c': _unichr(169), 'start': start, 'end': end}
+        'c': chr(169), 'start': start, 'end': end}
 
 
 def main():

@@ -36,10 +36,9 @@ try:
         FigureCanvasWxAgg as FigCanvas
     from matplotlib.lines import Line2D
     from matplotlib.artist import Artist
-    from matplotlib.patches import Polygon, Ellipse, Rectangle
+    from matplotlib.patches import Polygon, Ellipse
     import matplotlib.image as mi
     import matplotlib.colors as mcolors
-    import matplotlib.cbook as cbook
 except ImportError as e:
     raise ImportError(_('The Scatterplot Tool needs the "matplotlib" '
                         '(python-matplotlib) package to be installed. {0}').format(e))
@@ -480,7 +479,7 @@ def MergeImg(cats_order, scatts, styles, rend_dt, output_queue):
             vmax = np.amax(masked_cat)
             # totally empty -> no need to render
             if vmax == 0:
-                render_cat_ids[cat_id] = None
+                rend_dt[cat_id] = None
                 continue
 
             cmap = _getColorMap(cat_id, styles)
@@ -1023,7 +1022,7 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     if norm is not None:
         assert(isinstance(norm, mcolors.Normalize))
     if aspect is None:
-        aspect = rcParams['image.aspect']
+        aspect = matplotlib.rcParams['image.aspect']
     axes.set_aspect(aspect)
 
     if extent:

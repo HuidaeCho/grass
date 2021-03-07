@@ -18,13 +18,10 @@ for details.
 """
 
 import os
-import sys
 import six
 import copy
 import tempfile
-import types
 
-from core import globalvar
 import wx
 
 from ctypes import *
@@ -44,8 +41,8 @@ from mapdisp import statusbar as sb
 from mapwin.buffered import BufferedMapWindow
 from vdigit.toolbars import VDigitToolbar
 from gui_core.mapdisp import DoubleMapFrame
-from core.render import Map, MapLayer
-from core.gcmd import RunCommand, GMessage, GError, GWarning
+from core.render import Map
+from core.gcmd import RunCommand, GMessage, GError
 from gui_core.dialogs import SetOpacityDialog
 from gui_core.wrap import Menu
 from mapwin.base import MapWindowProperties
@@ -54,8 +51,8 @@ from dbmgr.vinfo import VectorDBInfo
 from iclass.digit import IClassVDigitWindow, IClassVDigit
 from iclass.toolbars    import IClassMapToolbar, IClassMiscToolbar,\
     IClassToolbar, IClassMapManagerToolbar
-from iclass.statistics import StatisticsData, Statistics, BandStatistics
-from iclass.dialogs     import CategoryListCtrl, IClassCategoryManagerDialog,\
+from iclass.statistics import StatisticsData
+from iclass.dialogs     import IClassCategoryManagerDialog,\
     IClassGroupDialog, IClassSignatureFileDialog,\
     IClassExportAreasDialog, IClassMapDialog
 from iclass.plots import PlotPanel
@@ -1139,7 +1136,7 @@ class IClassMapFrame(DoubleMapFrame):
         dlg.Destroy()
 
     def InitStatistics(self):
-        """Initialize variables and c structures neccessary for
+        """Initialize variables and c structures necessary for
         computing statistics.
         """
         self.g = {'group': None, 'subgroup': None}
@@ -1294,7 +1291,7 @@ class MapManager:
     def __init__(self, frame, mapWindow, Map):
         """
 
-        It is expected that \a mapWindow is conected with \a Map.
+        It is expected that \a mapWindow is connected with \a Map.
 
         :param frame: application main window
         :param mapWindow: map window instance
@@ -1465,8 +1462,6 @@ class MapManager:
 
 
 def test():
-    import core.render as render
-
     app = wx.App()
 
     frame = IClassMapFrame()

@@ -645,7 +645,7 @@ class TplotFrame(wx.Frame):
             self.axes2d.set_xlabel(self.drawX)
         else:
             if self.temporalType == 'absolute':
-                self.axes2d.set_xlabel(_("Temporal resolution: %s" %  x ))
+                self.axes2d.set_xlabel(_("Temporal resolution: %s" % x ))
             else:
                 self.axes2d.set_xlabel(_("Time [%s]") % self.unit)
         if self.drawY != '':
@@ -1051,7 +1051,7 @@ class TplotFrame(wx.Frame):
         :param list vectors: a list of temporal vector dataset's name
         :param list coors: a list with x/y coordinates
         :param list cats: a list with incld. categories of vector
-        :param str attr:  name of atribute of vectror data
+        :param str attr:  name of attribute of vectror data
         """
         if not (rasters or vectors) or not (coors or cats):
             return

@@ -25,7 +25,6 @@ import sys
 import shutil
 import copy
 import platform
-import codecs
 import getpass
 
 from core import globalvar
@@ -567,7 +566,7 @@ class GRASSStartup(wx.Frame):
     def ImportFile(self, filePath):
         """Tries to import file as vector or raster.
 
-        If successfull sets default region from imported map.
+        If successful sets default region from imported map.
         """
         RunCommand('db.connect', flags='c')
         mapName = os.path.splitext(os.path.basename(filePath))[0]
@@ -1132,7 +1131,7 @@ class GListBox(ListCtrl, listmix.ListCtrlAutoWidthMixin):
         self._LoadData(choices, disabled)
 
     def SetSelection(self, item, force=False):
-        if item !=  wx.NOT_FOUND and \
+        if item != wx.NOT_FOUND and \
                 (platform.system() != 'Windows' or force):
             # Windows -> FIXME
             self.SetItemState(

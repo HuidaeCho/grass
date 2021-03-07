@@ -2,43 +2,45 @@
 
 # g.parser demo script for python programming
 
-#%module
-#% description: g.parser test script (python)
-#% keyword: keyword1
-#% keyword: keyword2
-#%end
-#%flag
-#% key: f
-#% description: A flag
-#%end
-#%option G_OPT_R_MAP
-#% key: raster
-#% required: yes
-#%end
-#%option G_OPT_V_MAP
-#% key: vector
-#%end
-#%option
-#% key: option1
-#% type: string
-#% description: An option
-#% required: no
-#%end
+# %module
+# % description: g.parser test script (python)
+# % keyword: keyword1
+# % keyword: keyword2
+# %end
+# %flag
+# % key: f
+# % description: A flag
+# %end
+# %option G_OPT_R_MAP
+# % key: raster
+# % required: yes
+# %end
+# %option G_OPT_V_MAP
+# % key: vector
+# %end
+# %option
+# % key: option1
+# % type: string
+# % description: An option
+# % required: no
+# %end
 
 import sys
 import atexit
 
 import grass.script as gs
 
+
 def cleanup():
     # add some cleanup code
     gs.message(_("Inside cleanup function..."))
 
+
 def main():
-    flag_f = flags['f']
-    option1 = options['option1']
-    raster = options['raster']
-    vector = options['vector']
+    flag_f = flags["f"]
+    option1 = options["option1"]
+    raster = options["raster"]
+    vector = options["vector"]
 
     #### add your code here ####
     exitcode = 0
@@ -58,6 +60,7 @@ def main():
     #### end of your code ####
 
     sys.exit(exitcode)
+
 
 if __name__ == "__main__":
     options, flags = gs.parser()
