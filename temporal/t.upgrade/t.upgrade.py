@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-
 ############################################################################
 #
-# MODULE:       t.snap
-# AUTHOR(S):    Soeren Gebbert
+# MODULE:       t.upgrade
+# AUTHOR(S):    Martin Landa, Markus Neteler
 #
-# PURPOSE:      Temporally snap the maps of a space time dataset.
-# COPYRIGHT:    (C) 2013-2017 by the GRASS Development Team
+# PURPOSE:      Upgrade of TGRASS DB
+# COPYRIGHT:    (C) 2020-2021 by Martin Landa, and the GRASS Development Team
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -21,48 +20,27 @@
 #############################################################################
 
 # %module
-# % description: Snaps temporally the maps of a space time dataset.
+# % description: Upgrades the version of the temporal database.
 # % keyword: temporal
-# % keyword: time management
-# % keyword: snapping
+# % keyword: metadata
 # % keyword: time
 # %end
 
-# %option G_OPT_STDS_INPUT
-# % description: Name of an existing space time dataset
-# %end
-
-# %option G_OPT_STDS_TYPE
-# % guidependency: input
-# % guisection: Required
-# %end
-
-import grass.script as grass
-
-
-############################################################################
+import grass.script as gs
 
 
 def main():
     # lazy imports
     import grass.temporal as tgis
 
-    name = options["input"]
-    type = options["type"]
-
-    # Make sure the temporal database exists
-    tgis.init()
+    tgis.init(skip_db_version_check=True)
 
     dbif = tgis.SQLDatabaseInterfaceConnection()
     dbif.connect()
 
-    stds = tgis.open_old_stds(name, type, dbif)
-    stds.snap(dbif=dbif)
-
-    stds.update_command_string(dbif=dbif)
-    dbif.close()
+    tgis.upgrade_temporal_database(dbif)
 
 
 if __name__ == "__main__":
-    options, flags = grass.parser()
+    gs.parser()
     main()
