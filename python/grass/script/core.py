@@ -465,7 +465,9 @@ def start_command(
     :return: Popen object
     """
     if "encoding" in kwargs.keys():
-        encoding = kwargs.pop("encoding")
+        # This variable was never used for anything.
+        # See https://github.com/OSGeo/grass/issues/1521
+        encoding = kwargs.pop("encoding")  # noqa: F841
 
     options = {}
     popts = {}
@@ -1045,13 +1047,13 @@ def _compare_units(dic):
         ["kilometer", "kilometre"],
         ["kilometers", "kilometres"],
     ]
-    for l in lookup:
+    for item in lookup:
         for n in range(len(dic["unit"])):
-            if dic["unit"][n].lower() in l:
-                dic["unit"][n] = l[0]
+            if dic["unit"][n].lower() in item:
+                dic["unit"][n] = item[0]
         for n in range(len(dic["units"])):
-            if dic["units"][n].lower() in l:
-                dic["units"][n] = l[0]
+            if dic["units"][n].lower() in item:
+                dic["units"][n] = item[0]
     return dic
 
 
@@ -1655,7 +1657,7 @@ def verbosity():
         return 2
 
 
-## various utilities, not specific to GRASS
+# Various utilities, not specific to GRASS
 
 
 def find_program(pgm, *args):

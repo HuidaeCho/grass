@@ -51,8 +51,8 @@ def db_describe(table, env=None, **args):
 
     cols = []
     result = {}
-    for l in s.splitlines():
-        f = l.split(":")
+    for line in s.splitlines():
+        f = line.split(":")
         key = f[0]
         f[1] = f[1].lstrip(" ")
         if key.startswith("Column "):
@@ -155,7 +155,7 @@ def db_select(sql=None, filename=None, table=None, env=None, **args):
     :param str sql: SQL statement to perform (or None)
     :param str filename: name of file with SQL statements (or None)
     :param str table: name of table to query (or None)
-    :param str args:  see \gmod{db.select} arguments
+    :param str args: see *db.select* arguments
     :param env: environment
     """
     fname = tempfile(create=False, env=env)
