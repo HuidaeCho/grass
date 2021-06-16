@@ -22,7 +22,7 @@ from sqlite3 import OperationalError
 
 try:
     from collections import OrderedDict
-except:
+except ImportError:
     from grass.pygrass.orderdict import OrderedDict
 
 import grass.lib.vector as libvect
@@ -899,7 +899,6 @@ class DBlinks(object):
         return (self.by_index(i) for i in range(self.num_dblinks()))
 
     def __getitem__(self, item):
-        """"""
         if isinstance(item, int):
             return self.by_index(item)
         else:
