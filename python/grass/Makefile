@@ -13,6 +13,7 @@ SUBDIRS = \
 	gunittest \
 	imaging \
 	jupyter \
+	projpicker \
 	pydispatch \
 	pygrass \
 	script \
