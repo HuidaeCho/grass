@@ -2197,10 +2197,13 @@ class CustomPage(TitledPage):
 
 
 class PPIKPage(TitledPage):
-    """Wizard page for selecting CRS spatially"""
+    """Wizard page for selecting CRS interactively in a map"""
 
     def __init__(self, wizard, parent):
-        TitledPage.__init__(self, wizard, _("Select CRS spatially"))
+        TitledPage.__init__(
+                self,
+                wizard,
+                _("Select CRS interactively in a map"))
         global coordsys
 
         self.sizer = wx.BoxSizer()
