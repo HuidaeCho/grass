@@ -9,6 +9,7 @@ SUBDIRS = \
 	app \
 	benchmark \
 	exceptions \
+	getosm \
 	grassdb \
 	gunittest \
 	imaging \
