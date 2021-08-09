@@ -374,7 +374,8 @@ class CoordinateSystemPage(TitledPage):
         # toggles
         self.radioPpik = wx.RadioButton(
             parent=self,
-            id=wx.ID_ANY, label=_("Select CRS interactively in a map"),
+            id=wx.ID_ANY,
+            label=_("Select CRS interactively in a map"),
             style=wx.RB_GROUP,
         )
         self.radioEpsg = wx.RadioButton(
@@ -2200,10 +2201,7 @@ class PPIKPage(TitledPage):
     """Wizard page for selecting CRS interactively in a map"""
 
     def __init__(self, wizard, parent):
-        TitledPage.__init__(
-                self,
-                wizard,
-                _("Select CRS interactively in a map"))
+        TitledPage.__init__(self, wizard, _("Select CRS interactively in a map"))
         global coordsys
 
         self.sizer = wx.BoxSizer()
@@ -2215,9 +2213,8 @@ class PPIKPage(TitledPage):
 
         # EPSG only?
         self.ppik = ProjPickerPanel(
-                self,
-                layout="map_left",
-                filter_bbox=lambda b: b.crs_auth_name=="EPSG")
+            self, layout="map_left", filter_bbox=lambda b: b.crs_auth_name == "EPSG"
+        )
         self.sizer.Add(self.ppik, 1, wx.EXPAND)
 
         # events
