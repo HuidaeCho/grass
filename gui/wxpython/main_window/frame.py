@@ -302,7 +302,6 @@ class GMFrame(wx.Frame):
         """Initialize Display widget"""
         # create display notebook
         self.notebookLayers = GNotebook(parent=parent, style=globalvar.FNPageStyle)
-        self.notebookLayers.SetTabAreaColour(globalvar.FNPageColor)
         menu = self._createTabMenu()
         self.notebookLayers.SetRightClickMenu(menu)
         # bindings
@@ -390,6 +389,7 @@ class GMFrame(wx.Frame):
         self.notebookLayers.AddPage(page=self.pg_panel, text=name, select=True)
         self.currentPage = self.notebookLayers.GetCurrentPage()
         self.currentPageNum = self.notebookLayers.GetSelection()
+        self.notebookLayers.EnsureVisible(self.currentPageNum)
 
         def CreateNewMapDisplay(layertree):
             """Callback function which creates a new Map Display window
