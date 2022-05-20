@@ -1,184 +1,133 @@
 # How to release GRASS GIS binaries and source code
 
-*Note: Some steps in this text are to be done by the development coordinator
+## Assumptions
+
+- You have communicated with other developers, e.g., through grass-dev mailing list.
+- You have communicated with a development coordinator.
+- You have evaluated status of issues and PRs associated with the relevant milestone.
+- You have already cloned the repo with Git.
+- Your own fork is the remote called "origin".
+- The OSGeo repo is the remote called "upstream".
+- You don't have any local un-pushed or un-committed changes.
+- You are using Bash or a similar shell.
+
+*Note: Some later steps in this text are to be done by the development coordinator
 (currently Markus Neteler and Martin Landa) due to needed logins.*
 
-## HOWTO create a release
+## Prepare the local repo
 
-### Preparations
-
-Check examples if still compiling
+Update your remotes and switch to branch:
 
 ```bash
-( cd doc/raster/r.example/ ; make clean ; make )
-( cd doc/vector/v.example/ ; make clean ; make )
+git fetch --all --prune && git checkout releasebranch_8_2
 ```
 
-### Fix typos in source code with
+Confirm that you are on the right branch and have no local changes:
 
 ```bash
-utils/fix_typos.sh
+# Should show no changes:
+git status
+# Should give no output at all:
+git diff
+git diff --staged
+git log upstream/releasebranch_8_2..HEAD
+# Should give the same as last commits visible on GitHub:
+git log --max-count=5
 ```
 
-### i18N: sync from Transifex
-
-See <https://www.transifex.com/grass-gis/grass7/dashboard/>
-
-Exception Latvian as Latvian is directly edited in git and then sync'ed from
-master .po files
+Now you can merge (or rebase) updates from the remote your local branch
+and optionally update your own fork:
 
 ```bash
-cd locale
-sh ~/software/grass-addons/utils/transifex_merge.sh
-make
-make verify
-# ... then fix .po files as needed.
-#
-# requires https://trac.osgeo.org/grass/ticket/3539
-## after that push fixes to transifex:
-#cd locale/transifex/
-#tx --debug push -t
+git merge upstream/releasebranch_8_2 && git push origin releasebranch_8_2
 ```
 
-### Update of configure base files
-
-*Only allowed in RC cycle, not for final release!*
-
-Check that autoconf scripts are up-to-date:
+Use `git log` and `git show` to verify the result:
 
 ```bash
-rm -f config.guess config.sub
-wget http://git.savannah.gnu.org/cgit/config.git/plain/config.guess
-wget http://git.savannah.gnu.org/cgit/config.git/plain/config.sub
-git diff config.guess config.sub
-autoconf2.69
+git log --max-count=5
+git show
 ```
 
-Now check if configure still works.
+Any time later, you can use `git log` and `git show` to see the latest
+commits and the last commit including the changes.
 
-If yes, submit to git:
+## Update VERSION file to release version number
+
+Modify the VERSION file use the dedicated script, for RC1, e.g.:
 
 ```bash
-git checkout -b config_sub_update
-git add config.guess config.sub configure
-git commit -m"config.guess + config.sub: updated from http://git.savannah.gnu.org/cgit/config.git/plain/"
-# test by running ./configure
-
-git push origin config_sub_update
-# open PR and merge
+./utils/update_version.py status
+./utils/update_version.py rc 1
 ```
 
-### Cleanup leftover rubbish files
+The script will compute the correct version string and print a message containing it into the terminal (e.g., "version: GRASS GIS 8.2.0RC1").
+
+Commit with a commit message suggested by the script, e.g.:
 
 ```bash
-rm -f locale/templates/*.pot
-rm -f locale/po/messages.mo
-rm -f demolocation/PERMANENT/.bash*
-find . -name '*~'     | xargs -r rm
-find . -name '*.bak'  | xargs -r rm
-find . -name '*.swp'  | xargs -r rm
-find . -name '.#*'    | xargs -r rm
-find . -name '*.orig' | xargs -r rm
-find . -name '*.rej'  | xargs -r rm
-find . -name '*.o'    | xargs -r rm
-find . -name '*.pyc'  | xargs -r rm
-find . -name 'OBJ.*'  | xargs -r rm -r
-find . -name '__pycache__' | xargs -r rm -r
-rm -f python/grass/ctypes/ctypesgencore/parser/lextab.py
-rm -f gui/wxpython/menustrings.py gui/wxpython/build_ext.pyc \
-  gui/wxpython/xml/menudata.xml gui/wxpython/xml/module_tree_menudata.xml
-chmod -R a+r *
+git diff
+git commit -m "version: GRASS GIS 8.2.0RC1" include/VERSION
+git show
+git push upstream
 ```
 
-Double check:
+## Create variables
+
+For convenience, create Bash variables with the version update script:
 
 ```bash
-git status --ignored
+# Get VERSION and TAG as variables.
+eval $(./utils/update_version.py status --bash)
 ```
 
-### Create release branch (only if not yet existing)
-
-.. see section below at end of file.
-
-### Update VERSION file to release version number
-
-Directly edit VERSION file in GH interface:
-
-<https://github.com/OSGeo/grass/blob/releasebranch_8_0/include/VERSION>
-
-Example:
-
-```bash
-8
-0
-1RC1
-2022
-```
-
-Commit with version message, e.g. "GRASS GIS 8.0.1RC1".
-
-### Create release tag
-
-(For background, see <https://help.github.com/en/articles/creating-releases>)
-
-Preparation:
-
-#### Changelog and tagging etc preparations
-
-```bash
-# update from GH
-#  assumptions:
-#  - own fork as "origin"
-#  - remote repo as "upstream"
-git fetch --all --prune && git checkout releasebranch_8_0 && \
- git merge upstream/releasebranch_8_0 && git push origin releasebranch_8_0
-
-# create version env var for convenience:
-MAJOR=`cat include/VERSION | head -1 | tail -1`
-MINOR=`cat include/VERSION | head -2 | tail -1`
-RELEASE=`cat include/VERSION | head -3 | tail -1`
-VERSION=${MAJOR}.${MINOR}.${RELEASE}
-echo $VERSION
-
-# RELEASETAG variable not really needed any more:
-TODAY=`date +"%Y%m%d"`
-RELEASETAG=release_${TODAY}_grass_${MAJOR}_${MINOR}_${RELEASE}
-echo $RELEASETAG
-```
-
-#### Tag release (on GitHub)
+Version and tag are the same for all releases:
 
 ```bash
 echo "$VERSION"
+echo "$TAG"
 ```
 
-To be done in GH interface:
+If in doubt, run the script without `eval $(...)` to see all the variables created.
 
-<https://github.com/OSGeo/grass/releases/new>
+## Create release tag
 
-- select release_branch first, then
-- fill in "Release Title" (e.g., GRASS GIS 8.0.1RC1)
-- fill in "Create tag" field: 8.0.1RC1
+The tag is created locally, while the release draft is created automatically by
+GitHub Actions and can be later edited on GitHub. For background on GitHub releases,
+see: <https://help.github.com/en/articles/creating-releases>.
 
-Tag version | target (examples):
-  8.0.1RC1  | releasebranch_8_0
+### Tag release
 
-- click on "Create new tag: ... on publish"
+Before creating the tag, it is a good idea to see if the CI jobs are not failing.
+Check on GitHub or use GitHub CLI:
 
-Add release desciption (re-use existing texts as possible, from
-<https://github.com/OSGeo/grass/releases>)
+```bash
+gh run list --branch releasebranch_8_2
+```
 
-If RC, then check
-[x] This is a pre-release
+Create an annotated tag (a lightweight tag is okay too, but there is more metadata
+stored for annotated tags including a date):
 
-### Changelog from GitHub for GH release notes
+```bash
+git tag $TAG -a -m "GRASS GIS 8.2.0RC1"
+```
+
+Now push the tag upstream - this will trigger the automated workflows linked to tags:
+
+```bash
+git push upstream $TAG
+```
+
+If the job fails, open an issue and see what you can do manually.
+
+### Create release notes
 
 Using GH API here, see also
 - https://cli.github.com/manual/gh_api
 - https://docs.github.com/en/rest/reference/repos#generate-release-notes-content-for-a-release
 
 ```bash
-gh api repos/OSGeo/grass/releases/generate-notes -f tag_name="8.0.1" -f previous_tag_name=8.0.0 -f target_commitish=releasebranch_8_0 -q .body
+gh api repos/OSGeo/grass/releases/generate-notes -f tag_name="8.2.0" -f previous_tag_name=8.2.0 -f target_commitish=releasebranch_8_2 -q .body
 ```
 
 If this fails or is incomplete, also a date may be used (that of the last release):
@@ -193,7 +142,26 @@ git log --oneline --after="2022-01-28" | cut -d' ' -f2- | sed 's+^+* +g' | sed '
 
 Importantly, these notes need to be manually sorted into the various categories (modules, wxGUI, library, docker, ...).
 
-### Changelog file for upload
+### Modify the release draft
+
+After the automated job completes, a new release draft will be available in the GitHub
+web interface. You can copy-paste the created release notes to GitHub and further modify as needed.
+
+Older release description may or may not be a good inspiration:
+<https://github.com/OSGeo/grass/releases>.
+
+If RC, mark it as a pre-release, check:
+
+```
+[x] This is a pre-release
+```
+
+Save the modified draft, but do not publish the release yet.
+
+## Changelog file for upload
+
+There is also a large changelog file we produce and publish,
+create it with a script (it takes several minutes to complete):
 
 ```bash
 python3 utils/gitlog2changelog.py
@@ -202,62 +170,64 @@ head ChangeLog_$VERSION
 gzip ChangeLog_$VERSION
 ```
 
-### Reset include/VERSION file to git version
+## Reset include/VERSION file to git development version
 
-Directly edit VERSION file in GH interface:
+Use a dedicated script to edit the VERSION file.
 
-<https://github.com/OSGeo/grass/blob/releasebranch_8_0/include/VERSION>
-
-Example:
+After an RC, switch to development version:
 
 ```bash
-8
-0
-1dev
-2021
+./utils/update_version.py dev
 ```
 
-Commit as "back to dev"
-
-Reset local copy to GH:
+After a (final) release, switch to development version for the next micro, minor, or major
+version, e.g., for micro version, use:
 
 ```bash
-# update from GH
-#  assumptions:
-#  - own fork as "origin"
-#  - remote repo as "upstream"
-git fetch --all --prune && git checkout releasebranch_8_0 && \
- git merge upstream/releasebranch_8_0 && git push origin releasebranch_8_0
+./utils/update_version.py micro
 ```
 
-### Getting the source code tarball for upload on OSGeo server
+Use _major_ and _minor_ operations for the other version updates.
+Use `--help` for details about the options.
+
+Commit with the suggested commit message and push, e.g.:
 
 ```bash
-# fetch tarball from GitHub
+git show
+git commit include/VERSION -m "version: Back to 8.2.0dev"
+git push upstream
+```
+
+## Get the source code tarball
+
+Fetch a tarball from GitHub we also publish on OSGeo servers:
+
+```bash
 wget https://github.com/OSGeo/grass/archive/${VERSION}.tar.gz -O grass-${VERSION}.tar.gz
 md5sum grass-${VERSION}.tar.gz > grass-${VERSION}.md5sum
 ```
 
-### Upload source code tarball to OSGeo servers
+## Upload source code tarball to OSGeo servers
 
-Note: grasslxd only reachable via jumphost - https://wiki.osgeo.org/wiki/SAC_Service_Status#GRASS_GIS_server
+Note: servers 'osgeo8-grass' and 'osgeo7-download' only reachable via
+      jumphost (managed by OSGeo-SAC) - see https://wiki.osgeo.org/wiki/SAC_Service_Status#grass
 
 ```bash
 # Store the source tarball (twice) in (use scp -p FILES grass:):
 USER=neteler
-SERVER1=grasslxd
+SERVER1=osgeo8-grass
 SERVER1DIR=/var/www/code_and_data/grass$MAJOR$MINOR/source/
-SERVER2=download.osgeo.org
+SERVER2=osgeo7-download
 SERVER2DIR=/osgeo/download/grass/grass$MAJOR$MINOR/source/
 echo $SERVER1:$SERVER1DIR
 echo $SERVER2:$SERVER2DIR
 
 # upload along with associated files:
 scp -p grass-$VERSION.* AUTHORS COPYING ChangeLog_$VERSION.gz \
-  INSTALL REQUIREMENTS.html SUBMITTING CONTRIBUTING.md $USER@$SERVER1:$SERVER1DIR
+  INSTALL REQUIREMENTS.html CONTRIBUTING.md $USER@$SERVER1:$SERVER1DIR
 
 scp -p grass-$VERSION.* AUTHORS COPYING ChangeLog_$VERSION.gz \
-  INSTALL REQUIREMENTS.html SUBMITTING CONTRIBUTING.md $USER@$SERVER2:$SERVER2DIR
+  INSTALL REQUIREMENTS.html CONTRIBUTING.md $USER@$SERVER2:$SERVER2DIR
 
 # Only at full release (i.e., not for RCs)!
 # generate link to "latest" source code
@@ -270,51 +240,43 @@ ssh $USER@$SERVER1 "cd $SERVER1DIR ; ln -s grass-$VERSION.tar.md5sum grass-$MAJO
 echo "https://grass.osgeo.org/grass$MAJOR$MINOR/source/"
 
 # update winGRASS related files: Update the winGRASS version
-# https://github.com/landam/wingrass-maintenance-scripts
+# https://github.com/landam/wingrass-maintenance-scripts/
 vim wingrass-maintenance-scripts/grass_packager_release.bat
 vim wingrass-maintenance-scripts/grass_addons.sh
 vim wingrass-maintenance-scripts/grass_copy_wwwroot.sh
 vim wingrass-maintenance-scripts/cronjob.sh       # major/minor release only
-
-# update addons - major/minor release only <<-- outdated?!
-vim grass-addons/utils/addons/grass-addons-publish.sh
-vim grass-addons/utils/addons/grass-addons-build.sh
-vim grass-addons/utils/addons/grass-addons.sh
 ```
 
-# update addon builder
+## Update addon builders
+
+Add the new version to repos which build or test addons:
+
+- https://github.com/OSGeo/grass-addons/blob/grass8/.github/workflows/ci.yml (currently new branches only)
 - https://github.com/landam/wingrass-maintenance-scripts/blob/master/grass_addons.sh (add new release related line)
 
-### Close milestone
+## Close milestone
 
-- Close related milestone: https://github.com/OSGeo/grass/milestones
+For a (final) release (not release candidate), close the related milestone at
+<https://github.com/OSGeo/grass/milestones>.
+If there are any open issues or PRs, move them to another milestone
+in the milestone view (all can be moved at once).
+
+## Publish the release
+
+When the above is done and the release notes are ready, publish the release at
+<https://github.com/OSGeo/grass/releases>.
 
 Release is done.
 
+## Create entries for the new release
 
-### Advertise the new release
+### Trac Wiki release page
 
-#### Write trac Wiki release page (probably to be dropped)
+Add entry in https://trac.osgeo.org/grass/wiki/Release
 
-To easily generate the entries for the trac Wiki release page, use the `git log` approach:
-- extract entries from oneline git log and prepare for trac Wiki copy-paste:
+### Update Hugo web site to show new version
 
-```
-# get date of previous release from https://github.com/OSGeo/grass/releases
-# verify
-git log --oneline --after="2022-01-28" | tac
-
-# prepare for trac Wiki release page (incl. PR trac macro)
-git log --oneline --after="2022-01-28" | cut -d' ' -f2- | sed 's+^+ * G80:+g' | sed 's+(#+(PR:+g' | sort -u
-```
-
-- store changelog entries in trac, by section:
-    - <https://trac.osgeo.org/grass/wiki/Release/8.0.x-News>
-    - <https://trac.osgeo.org/grass/wiki/Grass8/NewFeatures80>  <- add content of major changes only
-
-#### Update CMS web site to show new version (not for RCs!)
-
-Write announcement and publish it:
+For a (final) release (not release candidate), write announcement and publish it:
 - News section, https://github.com/OSGeo/grass-website/tree/master/content/news
 
 Software pages:
@@ -325,7 +287,7 @@ Software pages:
 - Wiki: https://grasswiki.osgeo.org/wiki/GRASS-Wiki
 
 
-#### Only in case of new major release
+### Only in case of new major release
 
 - update cronjob '[cron_grass8_main_src_snapshot.sh](https://github.com/OSGeo/grass-addons/tree/grass8/utils/cronjobs_osgeo_lxd/)' on grass.osgeo.org to next
   but one release tag for the differences
@@ -335,43 +297,43 @@ Software pages:
 - Add trac Wiki Macro definitions for manual pages G8X:modulename
     - Edit: <https://trac.osgeo.org/grass/wiki/InterMapTxt>
 
-#### WinGRASS notes
+## Packaging notes
+
+### WinGRASS notes
 
 - Update grass_packager_release.bat, eg.
 
 ```
      set MAJOR=8
-     set MINOR=0
-     set PATCH=1RC1
+     set MINOR=2
+     set PATCH=0RC1
 ```
 
 - Update addons (grass_addons.sh) rules, eg.
 
 ```
-     compile $GIT_PATH/grass8 $GISBASE_PATH/grass801RC1  $ADDON_PATH/grass801RC1/addons
+     compile $GIT_PATH/grass8 $GISBASE_PATH/grass820RC1  $ADDON_PATH/grass820RC1/addons
 ```
 
 - Modify grass_copy_wwwroot.sh accordingly, eg.
 
 ```
-     copy_addon 801RC1 8.0.1RC1
+     copy_addon 820RC1 8.2.0RC1
 ```
 
-#### Launchpad notes
+### Ubuntu Launchpad notes
 
 - Create milestone and release: <https://launchpad.net/grass/+series>
 - Upload tarball for created release
-- Update daily recipe contents: <https://code.launchpad.net/~grass/+recipe/grass-trunk>
 
-#### Packaging notes
+### Other notes
 
 - <https://trac.osgeo.org/grass/wiki/BuildHints>
     - <https://trac.osgeo.org/grass/wiki/DebianUbuntuPackaging>
     - <https://trac.osgeo.org/grass/wiki/CompileOnWindows>
 
-#### Marketing - tell others about release
+## Tell others about release
 
-- Notify all packagers (MN has email list)
 - If release candidate:
     - <grass-announce@lists.osgeo.org>
     - <grass-dev@lists.osgeo.org>
