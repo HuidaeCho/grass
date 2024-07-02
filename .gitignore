@@ -1,6 +1,7 @@
 /emacs.desktop
 *~
 *.lock
+!flake.lock
 *.pyc
 OBJ.*
 locale/scriptstrings/*
@@ -64,3 +65,9 @@ lib/*/latex/
 
 # ignore cmake build directory
 build
+
+# Ignore code coverage files
+*.gcov
+*.gcno
+*.gcda
+.coverage
