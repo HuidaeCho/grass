@@ -230,11 +230,10 @@ def UpdateGRASSAddOnCommands(eList=None):
                     and name not in grassScripts[ext]
                 ):
                     grassScripts[ext].append(name)
-            else:
-                if fname not in grassCmd:
-                    grassCmd.add(fname)
-                    Debug.msg(3, "AddOn commands: %s", fname)
-                    nCmd += 1
+            elif fname not in grassCmd:
+                grassCmd.add(fname)
+                Debug.msg(3, "AddOn commands: %s", fname)
+                nCmd += 1
 
     Debug.msg(1, "Number of GRASS AddOn commands: %d", nCmd)
 
@@ -251,7 +250,7 @@ toolbarSize = (24, 24)
 hasAgw = CheckWxVersion([2, 8, 11, 0])
 wxPythonPhoenix = CheckWxPhoenix()
 
-gtk3 = True if "gtk3" in wx.PlatformInfo else False
+gtk3 = "gtk3" in wx.PlatformInfo
 
 """@Add GUIDIR/scripts into path"""
 os.environ["PATH"] = os.path.join(GUIDIR, "scripts") + os.pathsep + os.environ["PATH"]
