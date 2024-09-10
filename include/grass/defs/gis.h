@@ -173,6 +173,9 @@ int G_vfaprintf(FILE *, const char *, va_list);
 int G_vsaprintf(char *, const char *, va_list);
 int G_vsnaprintf(char *, size_t, const char *, va_list);
 
+/* strlcpy.c */
+size_t G_strlcpy(char *, const char *, size_t);
+
 /* basename.c */
 char *G_basename(char *, const char *);
 size_t G_get_num_decimals(const char *);
@@ -565,6 +568,9 @@ void G_newlines_to_spaces(char *);
 int G_name_is_fully_qualified(const char *, char *, char *);
 char *G_fully_qualified_name(const char *, const char *);
 int G_unqualified_name(const char *, const char *, char *, char *);
+
+/* omp_threads.c */
+int G_set_omp_num_threads(struct Option *);
 
 /* open.c */
 int G_open_new(const char *, const char *);

@@ -71,3 +71,5 @@ build
 *.gcno
 *.gcda
 .coverage
+.coverage.*
+coverage.xml
