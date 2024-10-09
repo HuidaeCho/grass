@@ -7,11 +7,15 @@ endif()
 set(grass_gis_DEFS "-DGRASS_VERSION_DATE=\"${GRASS_VERSION_DATE}\"")
 if(MSVC)
   set(grass_gis_DEFS "${grass_gis_DEFS};-D_USE_MATH_DEFINES=1")
+  set(gislib_INCLUDES "../../msvc")
+  list(APPEND gislib_SRCS "../../msvc/dirent.c")
 endif()
 
 build_module(
   NAME
   grass_gis
+  INCLUDES
+  ${gislib_INCLUDES}
   SOURCES
   "${gislib_SRCS}"
   DEPENDS
@@ -71,7 +75,7 @@ install(
 install(FILES colors.desc renamed_options DESTINATION ${GRASS_INSTALL_ETCDIR})
 
 if(UNIX)
-  target_link_libraries(grass_gis PRIVATE LIBM)
+  target_link_libraries(grass_gis PRIVATE ${LIBM})
 endif()
 
 if(MSVC)
