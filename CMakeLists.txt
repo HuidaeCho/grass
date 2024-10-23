@@ -70,13 +70,20 @@ endif()
 
 if(CMAKE_BUILD_TYPE)
   set(grass_build_type "${CMAKE_BUILD_TYPE}")
-  string(TOLOWER "${grass_build_type}" grass_build_type_lc)
-  set(find_library_suffix "_RELEASE")
-  if(grass_build_type_lc STREQUAL "debug")
-    set(find_library_suffix "_DEBUG")
+  if(MSVC)
+    set(find_library_suffix "")
+  else()
+    string(TOLOWER "${grass_build_type}" grass_build_type_lc)
+    set(find_library_suffix "_RELEASE")
+    if(grass_build_type_lc STREQUAL "debug")
+      set(find_library_suffix "_DEBUG")
+    endif()
   endif()
 else()
   set(find_library_suffix "")
+  if(MSVC)
+    set(CMAKE_BUILD_TYPE "DEBUG")
+  endif()
 endif()
 
 # Graphics options
@@ -213,15 +220,26 @@ set(THUMBNAILS_PY ${CMAKE_BINARY_DIR}/utils/thumbnails.py)
 set(HTML2MAN VERSION_NUMBER=${GRASS_VERSION_NUMBER} ${PYTHON_EXECUTABLE}
              ${OUTDIR}/${GRASS_INSTALL_UTILSDIR}/g.html2man.py)
 
-if(WIN32)
-  set(sep "\;")
-else()
-  set(sep ":")
-endif()
-
 set(env_path "$ENV{PATH}")
 
-set(grass_env_command
+if(WIN32)
+  set(sep "\;")
+  string(REPLACE ";" "${sep}" env_path "${env_path}")
+  string(APPEND BIN_DIR "\\${CMAKE_BUILD_TYPE}")
+  string(APPEND LIB_DIR "\\${CMAKE_BUILD_TYPE}")
+  set(grass_env_command
+    ${CMAKE_COMMAND} -E env "PATH=${BIN_DIR}${sep}${SCRIPTS_DIR}${sep}${env_path}${sep}${LIB_DIR}"
+    "PYTHONPATH=${ETC_PYTHON_DIR}${sep}${GUI_WXPYTHON_DIR}${sep}$ENV{PYTHONPATH}"
+    "GISBASE=${RUN_GISBASE_NATIVE}" "GISRC=${GISRC}" "LC_ALL=C" "LANG=C"
+    "LANGUAGE=C" "MODULE_TOPDIR=${MODULE_TOPDIR}" "HTMLDIR=${DOC_DIR}"
+    "LC_ALL=C" "LANG=C"
+    "LANGUAGE=C"
+    "VERSION_NUMBER=\"${GRASS_VERSION_NUMBER}\""
+    "VERSION_DATE=\"${GRASS_VERSION_DATE}\"")
+    message(STATUS "Command ${grass_env_command}")
+else()
+  set(sep ":")
+  set(grass_env_command
     ${CMAKE_COMMAND} -E env "PATH=${BIN_DIR}${sep}${SCRIPTS_DIR}${sep}${env_path}"
     "PYTHONPATH=${ETC_PYTHON_DIR}${sep}${GUI_WXPYTHON_DIR}${sep}$ENV{PYTHONPATH}"
     "LD_LIBRARY_PATH=${LIB_DIR}${sep}$ENV{LD_LIBRARY_PATH}"
@@ -229,6 +247,7 @@ set(grass_env_command
     "LANGUAGE=C" "MODULE_TOPDIR=${MODULE_TOPDIR}" "HTMLDIR=${DOC_DIR}"
     "VERSION_NUMBER=\"${GRASS_VERSION_NUMBER}\""
     "VERSION_DATE=\"${GRASS_VERSION_DATE}\"")
+endif()
 
 set(NO_HTML_DESCR_TARGETS "g.parser;ximgview;test.raster3d.lib")
 

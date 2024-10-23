@@ -12,10 +12,13 @@ find_package(FLEX REQUIRED)
 
 find_package(BISON REQUIRED)
 
-find_library(MATH_LIBRARY m)
-add_library(LIBM INTERFACE IMPORTED GLOBAL)
-set_property(TARGET LIBM PROPERTY INTERFACE_LINK_LIBRARIES ${MATH_LIBRARY})
-mark_as_advanced(M_LIBRARY)
+if(UNIX)
+  find_library(MATH_LIBRARY m)
+  add_library(LIBM INTERFACE IMPORTED GLOBAL)
+  set_property(TARGET LIBM PROPERTY INTERFACE_LINK_LIBRARIES ${MATH_LIBRARY})
+  mark_as_advanced(M_LIBRARY)
+  set(LIBM LIBM)
+endif()
 
 find_package(PROJ REQUIRED)
 if(PROJ_FOUND)
@@ -269,6 +272,10 @@ endif()
 
 if(WITH_OPENMP)
   find_package(OpenMP REQUIRED)
+  if(MSVC AND OPENMP_FOUND)
+    # for min/max reduction
+    add_compile_options(-openmp:llvm)
+  endif()
 endif()
 
 # Data format options

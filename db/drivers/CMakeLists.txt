@@ -42,6 +42,7 @@ build_program_in_subdir(
   ${dbf_SRCS}
   DEPENDS
   grass_gis
+  grass_dbstubs
   grass_dbmibase
   grass_dbmidriver
   grass_shape
@@ -59,6 +60,7 @@ build_program_in_subdir(
   ogr
   DEPENDS
   grass_gis
+  grass_dbstubs
   grass_dbmibase
   grass_dbmidriver
   grass_sqlp
@@ -76,6 +78,7 @@ build_program_in_subdir(
   odbc
   DEPENDS
   grass_gis
+  grass_dbstubs
   grass_dbmidriver
   grass_sqlp
   DEFS
@@ -94,7 +97,8 @@ build_program_in_subdir(
   sqlite
   DEPENDS
   grass_gis
-  grass_dbmibase
+  grass_dbstubs
+  grass_dbmibase 
   grass_dbmidriver
   grass_sqlp
   DEFS
@@ -116,6 +120,7 @@ build_program_in_subdir(
   pg
   DEPENDS
   grass_gis
+  grass_dbstubs
   grass_dbmibase
   grass_dbmidriver
   grass_sqlp
@@ -128,8 +133,8 @@ build_program_in_subdir(
   RUNTIME_OUTPUT_DIR
   "${GRASS_INSTALL_DRIVERDIR}/db")
 
-if(TARGET MYSQL)
-  list(APPEND db_drivers mysql)
+if(TARGET POSTGRES)
+  list(APPEND db_drivers pg)
 endif()
 
 build_program_in_subdir(
@@ -138,6 +143,7 @@ build_program_in_subdir(
   ${mysql_SRCS}
   DEPENDS
   grass_gis
+  grass_dbstubs
   grass_dbmibase
   grass_dbmidriver
   grass_sqlp
